@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Chamber – Smart PDFs, Seamless Productivity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --focus: #00AEEF;
+            --glow-light: rgba(0, 174, 239, 0.25);
+            --glow-dark: rgba(0, 238, 255, 0.35);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.4s ease;
+        }
+        :root {
+            --bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
+            --header-bg: #0F172A;         /* Deep Navy */
+            --card-bg: #ffffff;
+            --text-primary: #002B5B;
+            --text-secondary: #455A64;
+            --border-upload: #00AEEF;
+            --btn-blue: #2196F3;
+            --btn-hover: #1976D2;
+            --shadow: rgba(0,0,0,0.08);
+            --progress-bg: #E0E0E0;
+            --footer-bg: #03A9F4;
+            --footer-text: #ECEFF1;
+            --card-glow: var(--glow-light);
+        }
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0D1B2A 0%, #1B263B 50%, #415A77 100%);
+            --header-bg: #0F172A;         /* Same deep navy in dark mode */
+            --card-bg: #1B263B;
+            --text-primary: #E0E1DD;
+            --text-secondary: #778DA9;
+            --btn-blue: #00AEEF;
+            --btn-hover: #0088CC;
+            --shadow: rgba(0,0,0,0.3);
+            --progress-bg: #415A77;
+            --footer-bg: #0D1B2A;
+            --footer-text: #E0E1DD;
+            --card-glow: var(--glow-dark);
+        }
+        .skip-link {
+            position: absolute; top: -40px; left: 6px;
+            background: #00AEEF; color: #fff; padding: 8px 16px;
+            border-radius: 0 0 8px 8px; font-weight: 600; z-index: 1000;
+            transition: top 0.3s;
+        }
+        .skip-link:focus { top: 0; }
+        button, [role="button"], .card-btn, .footer-links a {
+            cursor: pointer; transition: var(--transition);
+        }
+        button:focus-visible, [role="button"]:focus-visible,
+        .card-btn:focus-visible, .footer-links a:focus-visible {
+            outline: 3px solid var(--focus); outline-offset: 4px;
+            box-shadow: 0 0 0 6px var(--card-glow);
+        }
+        header {
+            background: var(--header-bg);
+            padding: 1rem 5%;
+            box-shadow: 0 4px 20px var(--shadow);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-inner {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-weight: 700; font-size: 1.8rem;
+            color: #FFFFFF;               /* White */
+            text-decoration: none;
+        }
+        .logo svg { width: 48px; height: 48px; fill: #00AEEF; }
+        .tagline {
+            font-size: 0.95rem;
+            color: #E2E8F0;               /* Soft white */
+            font-weight: 500;
+        }
+        .theme-toggle {
+            width: 56px; height: 30px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid #00AEEF; border-radius: 50px;
+            position: relative;
+        }
+        .theme-toggle::before {
+            content: ''; position: absolute;
+            top: 3px; left: 4px; width: 20px; height: 20px;
+            background: #00AEEF; border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(24px); background: #1B263B;
+        }
+        .hero { max-width: 1400px; margin: 2rem auto; padding: 0 5%; text-align: center; }
+        .search-bar {
+            display: flex; max-width: 600px; margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px var(--shadow); border-radius: 50px;
+            overflow: hidden; background: var(--card-bg);
+        }
+        .search-bar input {
+            flex: 1; padding: 1rem 1.5rem; border: none; font-size: 1rem;
+            background: transparent; color: var(--text-primary);
+        }
+        .search-bar button {
+            background: var(--btn-blue); color: #fff; border: none;
+            padding: 0 1.8rem; font-weight: 600;
+        }
+        .upload-area {
+            border: 3px dashed var(--border-upload); border-radius: 16px;
+            padding: 2.5rem 1rem; background: rgba(255,255,255,0.7);
+            max-width: 700px; margin: 0 auto; cursor: pointer;
+        }
+        [data-theme="dark"] .upload-area { background: rgba(27,38,59,0.8); }
+        .upload-text { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--text-primary); }
+        .upload-btn {
+            background: var(--btn-blue); color: #fff; border: none;
+            padding: 0.75rem 2rem; border-radius: 50px; font-weight: 600;
+        }
+        .tools { max-width: 1400px; margin: 3rem auto; padding: 0 5%; }
+        .tools-grid {
+            display: grid; gap: 2rem; grid-template-columns: 1fr;
+        }
+        @media (min-width: 768px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 992px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
+        .tool-card {
+            background: var(--card-bg); border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 30px var(--shadow); transition: var(--transition);
+            position: relative; display: flex; flex-direction: column;
+        }
+        .tool-card::before {
+            content: ''; position: absolute; inset: 0; border-radius: 16px;
+            padding: 4px; background: linear-gradient(135deg, #00AEEF, #00E5FF);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: -1;
+        }
+        .tool-card:hover::before, .tool-card:focus-within::before { opacity: 1; }
+        .tool-card:hover, .tool-card:focus-within {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 50px var(--card-glow);
+        }
+        .card-icon {
+            height: 100px; background: linear-gradient(135deg, #00AEEF, #2196F3);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-icon svg { width: 56px; height: 56px; fill: #fff; }
+        .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+        .card-body h3 { font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .card-body p { flex: 1; font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem; }
+        .card-btn {
+            align-self: flex-start; background: var(--btn-blue); color: #fff;
+            border: none; padding: 0.65rem 1.5rem; border-radius: 8px;
+            font-weight: 600;
+        }
+        .progress-container {
+            max-width: 700px; margin: 2rem auto; background: var(--card-bg);
+            padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow);
+            display: none;
+        }
+        .progress-bar {
+            height: 12px; background: var(--progress-bg); border-radius: 6px;
+            overflow: hidden; margin-top: 0.75rem;
+        }
+        .progress-fill {
+            height: 100%; width: 0%; background: #00AEEF;
+            border-radius: 6px; transition: width 0.4s ease;
+        }
+        footer {
+            margin-top: auto; background: var(--footer-bg); color: var(--footer-text);
+            padding: 2rem 5%; text-align: center; font-size: 0.9rem;
+        }
+        .footer-links { margin-top: 0.75rem; }
+        .footer-links a {
+            color: #fff; margin: 0 1rem; font-weight: 500;
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .header-inner { flex-direction: column; text-align: center; }
+            .logo { font-size: 1.5rem; }
+            .search-bar { max-width: 100%; }
+            .upload-area { padding: 2rem 1rem; }
+        }
+        .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+        <div class="header-inner">
+            <a href="#" class="logo" aria-label="PDF Chamber Homepage">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                PDF Chamber
+            </a>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="tagline">Smart PDFs, Seamless Productivity</div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+            </div>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="hero" aria-labelledby="hero-title">
+            <h1 id="hero-title" class="visually-hidden">PDF Tools</h1>
+            <div class="search-bar" role="search">
+                <label for="searchInput" class="visually-hidden">Search tools</label>
+                <input type="text" id="searchInput" placeholder="Search tools..." aria-label="Search PDF tools" />
+                <button id="searchBtn" aria-label="Search">Search</button>
+            </div>
+
+            <div class="upload-area" id="uploadArea" tabindex="0" role="button" aria-label="Upload PDF">
+                <p class="upload-text">Drag & drop files here or click to upload</p>
+                <button class="upload-btn" aria-label="Choose file">Choose File</button>
+                <input type="file" id="fileInput" accept=".pdf" hidden multiple />
+            </div>
+
+            <div class="progress-container" id="progressContainer" role="status" aria-live="polite">
+                <div style="display:flex; justify-content:space-between;">
+                    <span id="fileName">example.pdf</span>
+                    <span id="percent">0%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <button class="upload-btn" id="downloadBtn" disabled>Download</button>
+            </div>
+        </section>
+
+        <section class="tools" aria-labelledby="tools-title">
+            <h2 id="tools-title" class="visually-hidden">Available PDF Tools</h2>
+            <div class="tools-grid" id="toolsGrid" role="list"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div>© 2025 PDF Chamber. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="#" aria-label="About Us">About Us</a>
+            <a href="#" aria-label="Privacy Policy">Privacy</a>
+            <a href="#" aria-label="Terms of Service">Terms</a>
+            <a href="#" aria-label="Support Center">Support</a>
+        </div>
+    </footer>
+
+    <script>
+        const tools = [
+            {name:"PDF Reader",desc:"Open and view any PDF instantly.",icon:"eye"},
+            {name:"Edit PDF",desc:"Add text, images, highlights.",icon:"edit"},
+            {name:"Crop PDF",desc:"Trim margins or extract pages.",icon:"crop"},
+            {name:"Compress PDF",desc:"Reduce size, keep quality.",icon:"compress"},
+            {name:"PDF to Word",desc:"Convert to editable DOCX.",icon:"word"},
+            {name:"Word to PDF",desc:"Turn Word into secure PDFs.",icon:"pdf"},
+            {name:"JPG to PDF",desc:"Images to high-quality PDFs.",icon:"image"},
+            {name:"PDF to JPG",desc:"Export pages as images.",icon:"export"},
+            {name:"Scan to PDF",desc:"Scan paper to digital PDF.",icon:"scan"},
+            {name:"Merge PDF",desc:"Combine multiple files.",icon:"merge"},
+            {name:"Split PDF",desc:"Break into single pages.",icon:"split"},
+            {name:"Organize PDF",desc:"Rearrange, rotate, delete.",icon:"organize"},
+            {name:"Sign PDF",desc:"Add e-signatures securely.",icon:"sign"},
+            {name:"Protect PDF",desc:"Password & encryption.",icon:"lock"},
+            {name:"Unlock PDF",desc:"Remove password protection.",icon:"unlock"}
+        ];
+        const icons = {
+            eye:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z",
+            edit:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+            crop:"M19 7h-3V5h-2v2H5v12h12v-2h2v-2h2V7h-2zm-4 10H7V9h10v8z",
+            compress:"M12 8l-6 6h4v6h4v-6h4l-6-6z",
+            word:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z",
+            pdf:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z",
+            image:"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5l4-5 2.5 3L15 12l4 5z",
+            export:"M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
+            scan:"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V7h14v12zm-2-8h-2v2h2v2h-2v2h-2v-2H9v2H7v-2H5v-2h2v-2H5V9h2V7h2v2h2V7h2v2h2V7h2v2z",
+            merge:"M17 7H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H7V9h10v10z",
+            split:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+            organize:"M4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4z",
+            sign:"M15.73 3c.41 0 .75.34.75.75v.75h2.25c.41 0 .75.34.75.75v12c0 .41-.34.75-.75.75h-13.5c-.41 0-.75-.34-.75-.75v-12c0-.41.34-.75.75-.75h2.25v-.75c0-.41.34-.75.75-.75h7.5zM9 4.5v1.5h6v-1.5h-6zm-3 4.5h12v9h-12v-9zm3 1.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5z",
+            lock:"M18 8h-1V6c0-2.76-2.24-5-5-5s-5 2.24-5 5v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z",
+            unlock:"M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5-1.28 0-2.45.49-3.33 1.29l1.41 1.41C11.32 3.26 11.64 3 12 3c1.66 0 3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"
+        };
+
+        const grid = document.getElementById('toolsGrid');
+        tools.forEach(t => {
+            const card = document.createElement('article');
+            card.className = 'tool-card';
+            card.role = 'listitem';
+            card.innerHTML = `
+                <div class="card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="${icons[t.icon] || icons.pdf}"/></svg>
+                </div>
+                <div class="card-body">
+                    <h3>${t.name}</h3>
+                    <p>${t.desc}</p>
+                    <button class="card-btn" data-tool="${t.name}" aria-label="Use ${t.name}">Use Tool</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        const html = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+        if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.dataset.theme = 'dark';
+        }
+        toggle.addEventListener('click', () => {
+            html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+            localStorage.theme = html.dataset.theme;
+        });
+
+        const searchInput = document.getElementById('searchInput');
+        const filterTools = () => {
+            const term = searchInput.value.toLowerCase();
+            document.querySelectorAll('.tool-card').forEach(c => {
+                c.style.display = c.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
+            });
+        };
+        document.getElementById('searchBtn').onclick = filterTools;
+        searchInput.addEventListener('input', filterTools);
+
+        document.addEventListener('click', e => {
+            if (e.target.matches('.card-btn')) alert(`Redirecting to ${e.target.dataset.tool}...`);
+        });
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const percentText = document.getElementById('percent');
+        const fileNameSpan = document.getElementById('fileName');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        ['dragenter','dragover'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.classList.add('dragover'); }));
+        ['dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.classList.remove('dragover'); }));
+        uploadArea.addEventListener('drop', e => handleFiles(e));
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+        fileInput.addEventListener('change', () => handleFiles({target:{files:fileInput.files}}));
+
+        function handleFiles(e) {
+            const file = (e.dataTransfer || e.target).files[0];
+            if (!file || !file.type.includes('pdf')) return alert('PDF only!');
+            fileNameSpan.textContent = file.name;
+            progressContainer.style.display = 'block';
+            let w = 0;
+            const int = setInterval(() => {
+                w += 10;
+                progressFill.style.width = w + '%';
+                percentText.textContent = w + '%';
+                if (w >= 100) { clearInterval(int); downloadBtn.disabled = false; downloadBtn.textContent = 'Download Processed PDF'; }
+            }, 300);
+        }
+
+        downloadBtn.onclick = () => {
+            alert('Download started...');
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                progressFill.style.width = '0%';
+                percentText.textContent = '0%';
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = 'Download';
+            }, 1500);
+        };
+    </script>
+</body>
+</html>
