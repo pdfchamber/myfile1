@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merge PDF – PDF Chamber</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <style>
+    :root {
+      --focus: #00AEEF;
+      --glow-light: rgba(0, 174, 239, 0.25);
+      --glow-dark: rgba(0, 238, 255, 0.35);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.4s ease;
+    }
+    :root {
+      --bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
+      --header-bg: #0F172A;
+      --card-bg: #ffffff;
+      --text-primary: #002B5B;
+      --text-secondary: #455A64;
+      --btn-blue: #2196F3;
+      --btn-hover: #1976D2;
+      --shadow: rgba(0,0,0,0.08);
+      --footer-bg: #03A9F4;
+      --footer-text: #ECEFF1;
+      --card-glow: var(--glow-light);
+    }
+    [data-theme="dark"] {
+      --bg-gradient: linear-gradient(135deg, #0D1B2A 0%, #1B263B 50%, #415A77 100%);
+      --header-bg: #0F172A;
+      --card-bg: #1B263B;
+      --text-primary: #E0E1DD;
+      --text-secondary: #778DA9;
+      --btn-blue: #00AEEF;
+      --btn-hover: #0088CC;
+      --shadow: rgba(0,0,0,0.3);
+      --footer-bg: #0D1B2A;
+      --footer-text: #E0E1DD;
+      --card-glow: var(--glow-dark);
+    }
+    header {
+      background: var(--header-bg);
+      padding: 1rem 5%;
+      box-shadow: 0 4px 20px var(--shadow);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #FFFFFF;
+      text-decoration: none;
+    }
+    .logo svg { width: 48px; height: 48px; fill: #00AEEF; }
+    .theme-toggle {
+      width: 56px; height: 30px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid #00AEEF;
+      border-radius: 50px;
+      position: relative;
+    }
+    .theme-toggle::before {
+      content: ''; position: absolute;
+      top: 3px; left: 4px;
+      width: 20px; height: 20px;
+      background: #00AEEF;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    [data-theme="dark"] .theme-toggle::before {
+      transform: translateX(24px); background: #1B263B;
+    }
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 5%;
+      text-align: center;
+      flex: 1;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+    .upload-area {
+      border: 3px dashed var(--btn-blue);
+      border-radius: 16px;
+      padding: 2.5rem 1rem;
+      background: var(--card-bg);
+      box-shadow: 0 8px 30px var(--shadow);
+      cursor: pointer;
+    }
+    .upload-area p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+    .file-list {
+      margin-top: 1.5rem;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px var(--shadow);
+      padding: 1rem;
+      text-align: left;
+    }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .file-item:last-child { border-bottom: none; }
+    .merge-btn {
+      background: var(--btn-blue);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      transition: var(--transition);
+    }
+    .merge-btn:hover { background: var(--btn-hover); }
+    footer {
+      background: var(--footer-bg);
+      color: var(--footer-text);
+      padding: 2rem 5%;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+        PDF Chamber
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+    </div>
+  </header>
+
+  <main>
+    <h1>Merge PDF Files</h1>
+    <div class="upload-area" id="uploadArea">
+      <p>Drag and drop multiple PDFs here or click to select</p>
+      <input type="file" id="fileInput" accept=".pdf" hidden multiple />
+    </div>
+    <div class="file-list" id="fileList" style="display:none;"></div>
+    <button class="merge-btn" id="mergeBtn" disabled>Merge PDFs</button>
+  </main>
+
+  <footer>© 2025 PDF Chamber. All rights reserved.</footer>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const setTheme = (t)=>document.documentElement.setAttribute('data-theme', t);
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    themeToggle.addEventListener('click',()=>{
+      const c=document.documentElement.getAttribute('data-theme');
+      const n=c==='light'?'dark':'light';
+      setTheme(n);
+      localStorage.setItem('theme', n);
+    });
+
+    // File handling and merging
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const mergeBtn = document.getElementById('mergeBtn');
+    let pdfFiles = [];
+
+    uploadArea.addEventListener('click',()=>fileInput.click());
+    uploadArea.addEventListener('dragover',e=>{
+      e.preventDefault(); uploadArea.style.background="rgba(0,174,239,0.1)";
+    });
+    uploadArea.addEventListener('dragleave',()=>uploadArea.style.background="var(--card-bg)");
+    uploadArea.addEventListener('drop',e=>{
+      e.preventDefault(); handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change',()=>handleFiles(fileInput.files));
+
+    function handleFiles(files){
+      pdfFiles = Array.from(files).filter(f=>f.type==="application/pdf");
+      if(pdfFiles.length===0) return alert("Please upload PDF files only.");
+      fileList.innerHTML="";
+      pdfFiles.forEach(f=>{
+        const div=document.createElement('div');
+        div.className="file-item";
+        div.textContent=f.name;
+        fileList.appendChild(div);
+      });
+      fileList.style.display="block";
+      mergeBtn.disabled=false;
+    }
+
+    mergeBtn.addEventListener('click', async ()=>{
+      if(pdfFiles.length<2) return alert("Select at least two PDFs to merge.");
+
+      mergeBtn.textContent="Merging...";
+      mergeBtn.disabled=true;
+
+      const mergedPdf = await PDFLib.PDFDocument.create();
+
+      for(const file of pdfFiles){
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        copiedPages.forEach(p => mergedPdf.addPage(p));
+      }
+
+      const mergedBytes = await mergedPdf.save();
+      const blob = new Blob([mergedBytes], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "merged.pdf";
+      link.click();
+
+      mergeBtn.textContent="Merge PDFs";
+      mergeBtn.disabled=false;
+    });
+  </script>
+</body>
+</html>
