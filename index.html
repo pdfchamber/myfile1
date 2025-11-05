@@ -25,7 +25,7 @@
         }
         :root {
             --bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
-            --header-bg: #0F172A;         /* Deep Navy */
+            --header-bg: #0F172A;
             --card-bg: #ffffff;
             --text-primary: #002B5B;
             --text-secondary: #455A64;
@@ -40,7 +40,7 @@
         }
         [data-theme="dark"] {
             --bg-gradient: linear-gradient(135deg, #0D1B2A 0%, #1B263B 50%, #415A77 100%);
-            --header-bg: #0F172A;         /* Same deep navy in dark mode */
+            --header-bg: #0F172A;
             --card-bg: #1B263B;
             --text-primary: #E0E1DD;
             --text-secondary: #778DA9;
@@ -81,13 +81,13 @@
         .logo {
             display: flex; align-items: center; gap: 0.75rem;
             font-weight: 700; font-size: 1.8rem;
-            color: #FFFFFF;               /* White */
+            color: #FFFFFF;
             text-decoration: none;
         }
         .logo svg { width: 48px; height: 48px; fill: #00AEEF; }
         .tagline {
             font-size: 0.95rem;
-            color: #E2E8F0;               /* Soft white */
+            color: #E2E8F0;
             font-weight: 500;
         }
         .theme-toggle {
@@ -184,10 +184,7 @@
             padding: 2rem 5%; text-align: center; font-size: 0.9rem;
         }
         .footer-links { margin-top: 0.75rem; }
-        .footer-links a {
-            color: #fff; margin: 0 1rem; font-weight: 500;
-            text-decoration: underline;
-        }
+        .footer-links a { color: #fff; margin: 0 1rem; font-weight: 500; text-decoration: underline; }
         @media (max-width: 768px) {
             .header-inner { flex-direction: column; text-align: center; }
             .logo { font-size: 1.5rem; }
@@ -272,105 +269,69 @@
             {name:"Protect PDF",desc:"Password & encryption.",icon:"lock"},
             {name:"Unlock PDF",desc:"Remove password protection.",icon:"unlock"}
         ];
+
         const icons = {
             eye:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z",
             edit:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
             crop:"M19 7h-3V5h-2v2H5v12h12v-2h2v-2h2V7h-2zm-4 10H7V9h10v8z",
             compress:"M12 8l-6 6h4v6h4v-6h4l-6-6z",
-            word:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z",
-            pdf:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z",
-            image:"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5l4-5 2.5 3L15 12l4 5z",
-            export:"M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
-            scan:"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V7h14v12zm-2-8h-2v2h2v2h-2v2h-2v-2H9v2H7v-2H5v-2h2v-2H5V9h2V7h2v2h2V7h2v2h2V7h2v2z",
-            merge:"M17 7H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H7V9h10v10z",
-            split:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
-            organize:"M4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zm-6 6h4v4h-4zm6 0h4v4h-4z",
-            sign:"M15.73 3c.41 0 .75.34.75.75v.75h2.25c.41 0 .75.34.75.75v12c0 .41-.34.75-.75.75h-13.5c-.41 0-.75-.34-.75-.75v-12c0-.41.34-.75.75-.75h2.25v-.75c0-.41.34-.75.75-.75h7.5zM9 4.5v1.5h6v-1.5h-6zm-3 4.5h12v9h-12v-9zm3 1.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5z",
-            lock:"M18 8h-1V6c0-2.76-2.24-5-5-5s-5 2.24-5 5v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z",
-            unlock:"M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5-1.28 0-2.45.49-3.33 1.29l1.41 1.41C11.32 3.26 11.64 3 12 3c1.66 0 3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"
+            word:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z",
+            pdf:"M12 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h6V2zm0 18H6V4h6v16zm2-8h8v2h-8zm0-4h8v2h-8zm0 8h8v2h-8z",
+            image:"M21 19V5H3v14h18zM5 7h14v8l-3.5-3.5-2.5 2.5-4-4L5 15V7z",
+            export:"M5 20h14v-2H5v2zM12 2L6.5 7.5 8 9l3-3v8h2V6l3 3 1.5-1.5L12 2z",
+            scan:"M4 6h16v2H4zM4 16h16v2H4zM6 10h12v4H6z",
+            merge:"M7 7h10v2H7zM7 15h10v2H7zM11 11h2v2h-2z",
+            split:"M3 12l7-9v5h8v8h-8v5l-7-9z",
+            organize:"M3 5h18v2H3zM3 11h12v2H3zM3 17h6v2H3z",
+            sign:"M2 21h20v2H2zM12 2L2 12h3v6h6v-6h3l6-6H12z",
+            lock:"M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-6h-1V9a5 5 0 0 0-10 0v2H6v10h12V11zm-8-2a3 3 0 0 1 6 0v2H10V9z",
+            unlock:"M18 8h-1V6a5 5 0 0 0-10 0h2a3 3 0 0 1 6 0v2H6v10h12V8z"
         };
 
         const grid = document.getElementById('toolsGrid');
         tools.forEach(t => {
-            const card = document.createElement('article');
+            const card = document.createElement('div');
             card.className = 'tool-card';
-            card.role = 'listitem';
+            card.setAttribute('role','listitem');
             card.innerHTML = `
-                <div class="card-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="${icons[t.icon] || icons.pdf}"/></svg>
-                </div>
+                <div class="card-icon"><svg viewBox="0 0 24 24"><path d="${icons[t.icon]}"/></svg></div>
                 <div class="card-body">
                     <h3>${t.name}</h3>
                     <p>${t.desc}</p>
-                    <button class="card-btn" data-tool="${t.name}" aria-label="Use ${t.name}">Use Tool</button>
-                </div>
-            `;
+                    <button class="card-btn" data-tool="${t.name}" aria-label="Use ${t.name} tool">Use Tool</button>
+                </div>`;
             grid.appendChild(card);
         });
 
-        const html = document.documentElement;
-        const toggle = document.getElementById('themeToggle');
-        if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.dataset.theme = 'dark';
-        }
-        toggle.addEventListener('click', () => {
-            html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-            localStorage.theme = html.dataset.theme;
-        });
-
-        const searchInput = document.getElementById('searchInput');
-        const filterTools = () => {
-            const term = searchInput.value.toLowerCase();
-            document.querySelectorAll('.tool-card').forEach(c => {
-                c.style.display = c.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
-            });
-        };
-        document.getElementById('searchBtn').onclick = filterTools;
-        searchInput.addEventListener('input', filterTools);
-
+        // ✅ Fixed redirect logic for PDF Reader and others
         document.addEventListener('click', e => {
-            if (e.target.matches('.card-btn')) alert(`Redirecting to ${e.target.dataset.tool}...`);
+            if (e.target.matches('.card-btn')) {
+                const tool = e.target.dataset.tool;
+                const toolPages = {
+                    "PDF Reader": "pdf-reader.html",
+                    "Edit PDF": "pdf-editor.html",
+                    "Crop PDF": "pdf-cropper.html",
+                    "Compress PDF": "pdf-compress.html"
+                };
+                if (toolPages[tool]) {
+                    window.location.href = toolPages[tool];
+                } else {
+                    alert(`The ${tool} tool is not yet available.`);
+                }
+            }
         });
 
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressFill = document.getElementById('progressFill');
-        const percentText = document.getElementById('percent');
-        const fileNameSpan = document.getElementById('fileName');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        ['dragenter','dragover'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.classList.add('dragover'); }));
-        ['dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.classList.remove('dragover'); }));
-        uploadArea.addEventListener('drop', e => handleFiles(e));
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-        fileInput.addEventListener('change', () => handleFiles({target:{files:fileInput.files}}));
-
-        function handleFiles(e) {
-            const file = (e.dataTransfer || e.target).files[0];
-            if (!file || !file.type.includes('pdf')) return alert('PDF only!');
-            fileNameSpan.textContent = file.name;
-            progressContainer.style.display = 'block';
-            let w = 0;
-            const int = setInterval(() => {
-                w += 10;
-                progressFill.style.width = w + '%';
-                percentText.textContent = w + '%';
-                if (w >= 100) { clearInterval(int); downloadBtn.disabled = false; downloadBtn.textContent = 'Download Processed PDF'; }
-            }, 300);
-        }
-
-        downloadBtn.onclick = () => {
-            alert('Download started...');
-            setTimeout(() => {
-                progressContainer.style.display = 'none';
-                progressFill.style.width = '0%';
-                percentText.textContent = '0%';
-                downloadBtn.disabled = true;
-                downloadBtn.textContent = 'Download';
-            }, 1500);
-        };
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const setTheme = (theme) => document.documentElement.setAttribute('data-theme', theme);
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            setTheme(next);
+            localStorage.setItem('theme', next);
+        });
     </script>
 </body>
 </html>
