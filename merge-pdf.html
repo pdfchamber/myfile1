@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Chamber – Merge PDFs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --focus: #00AEEF;
+    --glow-light: rgba(0, 174, 239, 0.25);
+    --glow-dark: rgba(0, 238, 255, 0.35);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
+    --header-bg: #0F172A;
+    --card-bg: #ffffff;
+    --text-primary: #002B5B;
+    --text-secondary: #455A64;
+    --border-upload: #00AEEF;
+    --btn-blue: #2196F3;
+    --btn-hover: #1976D2;
+    --shadow: rgba(0,0,0,0.08);
+    --progress-bg: #E0E0E0;
+    --footer-bg: #03A9F4;
+    --footer-text: #ECEFF1;
+    --card-glow: var(--glow-light);
+}
+[data-theme="dark"] {
+    --bg-gradient: linear-gradient(135deg, #0D1B2A 0%, #1B263B 50%, #415A77 100%);
+    --header-bg: #0F172A;
+    --card-bg: #1B263B;
+    --text-primary: #E0E1DD;
+    --text-secondary: #778DA9;
+    --btn-blue: #00AEEF;
+    --btn-hover: #0088CC;
+    --shadow: rgba(0,0,0,0.3);
+    --progress-bg: #415A77;
+    --footer-bg: #0D1B2A;
+    --footer-text: #E0E1DD;
+    --card-glow: var(--glow-dark);
+}
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+header {
+    background: var(--header-bg);
+    padding: 1rem 5%;
+    box-shadow: 0 4px 20px var(--shadow);
+    position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+}
+.logo { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.8rem; color: #FFFFFF; text-decoration: none; }
+.logo svg { width: 48px; height: 48px; fill: #00AEEF; }
+.tagline { font-size: 0.95rem; color: #E2E8F0; font-weight: 500; }
+.theme-toggle { width: 56px; height: 30px; background: rgba(255,255,255,0.15); border: 2px solid #00AEEF; border-radius: 50px; position: relative; cursor: pointer; }
+.theme-toggle::before { content: ''; position: absolute; top: 3px; left: 4px; width: 20px; height: 20px; background: #00AEEF; border-radius: 50%; transition: transform 0.3s; }
+[data-theme="dark"] .theme-toggle::before { transform: translateX(24px); background: #1B263B; }
+
+main { flex: 1 0 auto; max-width: 1400px; margin: 2rem auto; padding: 0 5%; text-align:center; }
+
+.upload-area { border: 3px dashed var(--border-upload); border-radius: 16px; padding: 2.5rem 1rem; background: rgba(255,255,255,0.7); max-width: 700px; margin: 0 auto 1rem; cursor: pointer; text-align: center; }
+[data-theme="dark"] .upload-area { background: rgba(27,38,59,0.8); }
+.upload-text { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--text-primary); }
+.upload-btn { background: var(--btn-blue); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; margin: 0.25rem; }
+.progress-container { max-width: 700px; margin: 1rem auto; background: var(--card-bg); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow); display: none; text-align:left; }
+.preview-list { display:flex; flex-direction:column; gap:0.5rem; max-height:200px; overflow-y:auto; margin-bottom:1rem; }
+.preview-item { display:flex; align-items:center; gap:0.5rem; padding:0.5rem; background:#f1f1f1; border-radius:6px; }
+[data-theme="dark"] .preview-item { background:#2b3b5c; }
+footer { flex-shrink:0; background: var(--footer-bg); color: var(--footer-text); padding:1.5rem 5%; text-align:center; font-size:0.9rem; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; }
+footer a { color:#fff; text-decoration:underline; margin:0 0.5rem; }
+.back-home { margin-top:1rem; display:inline-block; background: var(--btn-blue); color:#fff; padding:0.65rem 1.5rem; border-radius:8px; text-decoration:none; font-weight:600; }
+
+</style>
+</head>
+<body>
+<header>
+<div class="header-inner">
+    <a href="#" class="logo" aria-label="PDF Chamber Homepage">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+        PDF Chamber
+    </a>
+    <div style="display:flex; align-items:center; gap:1rem;">
+        <div class="tagline">Smart PDFs, Seamless Productivity</div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"></button>
+    </div>
+</div>
+</header>
+
+<main>
+<h1 style="margin-bottom:1rem;">Merge PDF Files</h1>
+
+<div class="upload-area" id="uploadArea" tabindex="0">
+    <p class="upload-text">Drag & drop PDFs here or click to upload</p>
+    <button class="upload-btn">Choose Files</button>
+    <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+</div>
+
+<div class="progress-container" id="progressContainer">
+    <div class="preview-list" id="previewList"></div>
+    <div class="preview-files" id="fileCount">0 files selected</div>
+    <button class="upload-btn" id="mergeBtn">Merge PDFs</button>
+    <a id="downloadLink" class="upload-btn" style="display:none;">Download Merged PDF</a>
+</div>
+
+<div style="text-align:center;">
+    <a href="index.html" class="back-home">Back to Home</a>
+</div>
+</main>
+
+<footer>
+<div>© 2025 PDF Chamber. All rights reserved.</div>
+<div>
+    <a href="#">About Us</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Support</a>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const setTheme = (theme) => document.documentElement.setAttribute('data-theme', theme);
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
+themeToggle.addEventListener('click', ()=>{
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current==='light'?'dark':'light';
+    setTheme(next);
+    localStorage.setItem('theme', next);
+});
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const previewList = document.getElementById('previewList');
+const progressContainer = document.getElementById('progressContainer');
+const fileCount = document.getElementById('fileCount');
+const mergeBtn = document.getElementById('mergeBtn');
+const downloadLink = document.getElementById('downloadLink');
+
+let selectedFiles = [];
+
+function updatePreview(){
+    previewList.innerHTML = '';
+    selectedFiles.forEach((file, idx)=>{
+        const div = document.createElement('div');
+        div.className='preview-item';
+        div.innerHTML = `
+            <input type="checkbox" class="file-checkbox" data-idx="${idx}" checked>
+            <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#2196F3" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/></svg>
+            <span>${file.name}</span>
+        `;
+        previewList.appendChild(div);
+    });
+    progressContainer.style.display = selectedFiles.length>0 ? 'block':'none';
+    updateCount();
+}
+
+function updateCount(){
+    const activeCount = document.querySelectorAll('.file-checkbox:checked').length;
+    fileCount.textContent = `${activeCount} file${activeCount!==1?'s':''} selected for merge`;
+    downloadLink.style.display='none';
+}
+
+uploadArea.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change',(e)=>{
+    selectedFiles=Array.from(e.target.files).filter(f=>f.type==='application/pdf');
+    updatePreview();
+});
+
+uploadArea.addEventListener('dragover', e=>{ e.preventDefault(); uploadArea.style.borderColor='#1976D2'; });
+uploadArea.addEventListener('dragleave', e=>{ e.preventDefault(); uploadArea.style.borderColor='var(--border-upload)'; });
+uploadArea.addEventListener('drop', e=>{
+    e.preventDefault();
+    selectedFiles = Array.from(e.dataTransfer.files).filter(f => f.type==='application/pdf');
+    updatePreview();
+});
+
+previewList.addEventListener('change', e=>{
+    if(e.target.classList.contains('file-checkbox')) updateCount();
+});
+
+mergeBtn.addEventListener('click', async ()=>{
+    const filesToMerge = Array.from(document.querySelectorAll('.file-checkbox:checked')).map(cb=>selectedFiles[cb.dataset.idx]);
+    if(filesToMerge.length<2){ alert('Select at least 2 PDFs to merge.'); return; }
+
+    const mergedPdf = await PDFLib.PDFDocument.create();
+    for(const file of filesToMerge){
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        copiedPages.forEach(p=>mergedPdf.addPage(p));
+    }
+
+    const mergedBytes = await mergedPdf.save();
+    const blob = new Blob([mergedBytes],{type:'application/pdf'});
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = 'merged.pdf';
+    downloadLink.style.display='inline-block';
+});
+</script>
+</body>
+</html>
