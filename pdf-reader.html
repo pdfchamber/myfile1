@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,11 +60,10 @@ main{flex:1;max-width:100%;margin:2rem auto;padding:0 2%;display:flex;flex-direc
 .reader-btn:disabled,.zoom-btn:disabled{opacity:0.6;cursor:not-allowed;}
 .page-indicator{font-size:0.95rem;color:#334155;}
 .viewer{width:min(90vw,1000px);box-shadow:0 0 20px var(--shadow);border-radius:12px;background:#f8f9fa;display:flex;justify-content:center;align-items:center;overflow:auto;}
-canvas{display:block;background:#fff;border-radius:12px;margin:0;}
+canvas{display:block;background:#fff;border-radius:12px;margin:0;max-width:100%;height:auto;}
 .status{min-height:1.2rem;font-size:0.9rem;color:#0f766e;text-align:center;}
 @media (max-width: 480px) {
-  .toolbar {flex-direction:column;align-items:stretch;}
-  .reader-btn,.zoom-btn {width:100%;min-width:unset;}
+  .toolbar {flex-wrap:wrap;justify-content:center;}
 }
 </style>
 </head>
@@ -132,7 +130,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 
 /* UI helpers */
 function setStatus(msg){statusEl.textContent=msg||'';}
-function updateIndicator(){pageIndicator.textContent=`Page: ${pdfDoc?currentPage:'–'} / ${pdfDoc?pdfDoc.numPages:'–'} • Zoom: ${Math.round(zoomLevel*100)}%`;}
+function updateIndicator(){
+  pageIndicator.textContent=`Page: ${pdfDoc?currentPage:'–'} / ${pdfDoc?pdfDoc.numPages:'–'} • Zoom: ${Math.round(zoomLevel*100)}%`;
+}
 function enableControls(enabled){
   [clearBtn,printBtn,downloadBtn,shareBtn,prevBtn,nextBtn,zoomInBtn,zoomOutBtn].forEach(b=>b.disabled=!enabled);
 }
@@ -272,5 +272,3 @@ updateIndicator();
 </script>
 </body>
 </html>
-```
-
