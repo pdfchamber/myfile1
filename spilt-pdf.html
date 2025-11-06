@@ -1,158 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>Split PDF – PDF Chamber</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<!-- PDF.js (render thumbnails) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+<!-- PDF-Lib (create new PDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
 <style>
-:root {
-  --focus: #00AEEF;
-  --transition: all 0.3s ease;
+:root{
+  --focus:#00AEEF;--transition:all .3s ease;
+  --bg-gradient:linear-gradient(135deg,#E3F2FD 0%,#BBDEFB 50%,#90CAF9 100%);
+  --header-bg:#0F172A;--card-bg:#fff;--text-primary:#002B5B;--text-secondary:#455A64;
+  --btn-blue:#2196F3;--btn-hover:#1976D2;--footer-bg:#03A9F4;--footer-text:#ECEFF1;
+  --border-upload:#00AEEF;
 }
-*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg-gradient);
-  color: var(--text-primary);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+[data-theme="dark"]{
+  --bg-gradient:linear-gradient(135deg,#0D1B2A 0%,#1B263B 50%,#415A77 100%);
+  --header-bg:#0F172A;--card-bg:#1B263B;--text-primary:#E0E1DD;--text-secondary:#AAB4BE;
+  --btn-blue:#00AEEF;--btn-hover:#0099CC;--footer-bg:#0D1B2A;--footer-text:#E0E1DD;
 }
-:root {
-  --bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
-  --header-bg: #0F172A;
-  --card-bg: #fff;
-  --text-primary: #002B5B;
-  --text-secondary: #455A64;
-  --btn-blue: #2196F3;
-  --btn-hover: #1976D2;
-  --footer-bg: #03A9F4;
-  --footer-text: #ECEFF1;
-  --border-upload: #00AEEF;
-}
-[data-theme="dark"] {
-  --bg-gradient: linear-gradient(135deg, #0D1B2A 0%, #1B263B 50%, #415A77 100%);
-  --header-bg: #0F172A;
-  --card-bg: #1B263B;
-  --text-primary: #E0E1DD;
-  --text-secondary: #AAB4BE;
-  --btn-blue: #00AEEF;
-  --btn-hover: #0099CC;
-  --footer-bg: #0D1B2A;
-  --footer-text: #E0E1DD;
-}
-header {
-  background: var(--header-bg);
-  color: white;
-  padding: 1rem 5%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.logo { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.8rem; color: white; text-decoration: none; }
-.logo svg { width: 40px; height: 40px; fill: #00AEEF; }
-.tagline { font-size: 0.9rem; color: #E0E1DD; }
-.theme-toggle { width: 56px; height: 30px; background: rgba(255,255,255,0.15); border: 2px solid #00AEEF; border-radius: 50px; position: relative; cursor: pointer; }
-.theme-toggle::before { content:''; position:absolute; top:3px; left:4px; width:20px; height:20px; background:#00AEEF; border-radius:50%; transition:transform .3s; }
-[data-theme="dark"] .theme-toggle::before { transform:translateX(24px); background:#1B263B; }
-
-main {
-  flex: 1;
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 5%;
-  text-align: center;
-}
-
-.upload-area {
-  border: 3px dashed var(--border-upload);
-  border-radius: 16px;
-  padding: 2rem 1rem;
-  background: rgba(255,255,255,0.7);
-  cursor: pointer;
-  margin-bottom: 1.5rem;
-}
-.upload-area p { color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem; }
-.upload-btn { background: var(--btn-blue); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 50px; font-weight: 600; }
-
-.preview-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-  max-height: 400px;
-  overflow-y: auto;
-}
-.preview-item {
-  background: var(--card-bg);
-  border: 1px solid var(--border-upload);
-  border-radius: 8px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.preview-item canvas {
-  width: 120px;
-  height: auto;
-  display: block;
-  margin-bottom: 0.3rem;
-}
-.preview-item label {
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  justify-content: center;
-}
-
-.counter-box {
-  background: var(--card-bg);
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  max-width: 400px;
-  margin: 0.5rem auto 1.5rem;
-  color: var(--text-secondary);
-}
-
-.btn {
-  background: var(--btn-blue);
-  color: white;
-  border: none;
-  padding: 0.8rem 2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  margin: 0.5rem;
-}
-.btn:hover { background: var(--btn-hover); }
-
-footer {
-  background: var(--footer-bg);
-  color: var(--footer-text);
-  text-align: center;
-  padding: 1.5rem 5%;
-  font-size: 0.9rem;
-  margin-top: auto;
-}
-.back-home {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg-gradient);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column;}
+header{background:var(--header-bg);color:#fff;padding:1rem 5%;display:flex;justify-content:space-between;align-items:center;}
+.logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.8rem;color:#fff;text-decoration:none;}
+.logo svg{width:40px;height:40px;fill:#00AEEF;}
+.tagline{font-size:.9rem;color:#E0E1DD;}
+.theme-toggle{width:56px;height:30px;background:rgba(255,255,255,.15);border:2px solid #00AEEF;border-radius:50px;position:relative;cursor:pointer;}
+.theme-toggle::before{content:'';position:absolute;top:3px;left:4px;width:20px;height:20px;background:#00AEEF;border-radius:50%;transition:transform .3s;}
+[data-theme="dark"] .theme-toggle::before{transform:translateX(24px);background:#1B263B;}
+main{flex:1;max-width:1200px;margin:2rem auto;padding:0 5%;text-align:center;}
+.upload-area{border:3px dashed var(--border-upload);border-radius:16px;padding:2rem 1rem;background:rgba(255,255,255,.7);cursor:pointer;margin-bottom:1.5rem;}
+.upload-area p{color:var(--text-primary);margin-bottom:.5rem;font-size:1.1rem;}
+.upload-btn{background:var(--btn-blue);color:#fff;border:none;padding:.75rem 2rem;border-radius:50px;font-weight:600;cursor:pointer;}
+.preview-container{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:1.5rem;max-height:400px;overflow-y:auto;}
+.preview-item{background:var(--card-bg);border:1px solid var(--border-upload);border-radius:8px;padding:.5rem;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.preview-item canvas{width:120px;height:auto;display:block;margin-bottom:.3rem;}
+.preview-item label{font-size:.85rem;display:flex;align-items:center;gap:.25rem;justify-content:center;}
+.counter-box{background:var(--card-bg);padding:1rem;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);max-width:400px;margin:0.5rem auto 1.5rem;color:var(--text-secondary);}
+.btn{background:var(--btn-blue);color:#fff;border:none;padding:.8rem 2rem;border-radius:8px;font-weight:600;cursor:pointer;margin:.5rem;}
+.btn:hover{background:var(--btn-hover);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+footer{background:var(--footer-bg);color:var(--footer-text);text-align:center;padding:1.5rem 5%;font-size:.9rem;margin-top:auto;}
+.back-home{display:flex;justify-content:center;margin-top:1.5rem;}
+.spinner{margin:2rem 0;font-style:italic;color:#777;}
 </style>
 </head>
-<body>
 
+<body>
 <header>
-  <a href="index.html" class="logo">
+  <a href="#" class="logo">
     <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
     PDF Chamber
   </a>
-  <div style="display:flex; align-items:center; gap:1rem;">
+  <div style="display:flex;align-items:center;gap:1rem;">
     <div class="tagline">Smart PDFs, Seamless Productivity</div>
     <div class="theme-toggle" id="themeToggle"></div>
   </div>
@@ -165,120 +71,166 @@ footer {
   <div class="upload-area" id="uploadArea">
     <p>Drag & drop a PDF here or click to upload</p>
     <button class="upload-btn">Choose File</button>
-    <input type="file" id="fileInput" accept=".pdf" hidden />
+    <input type="file" id="fileInput" accept=".pdf" hidden>
   </div>
 
-  <div class="counter-box" id="counterBox">
-    Total Pages: 0 | Selected: 0
-  </div>
+  <div class="counter-box" id="counterBox">Total Pages: 0 | Selected: 0</div>
 
-  <div class="preview-container" id="previewContainer"></div>
+  <div id="previewContainer" class="preview-container"></div>
 
   <button class="btn" id="splitBtn" disabled>Split Selected Pages</button>
   <button class="btn" id="downloadBtn" disabled>Download Split PDF</button>
 
-  <div class="back-home">
-    <a href="index.html"><button class="btn">← Back to Home</button></a>
-  </div>
+  <div class="back-home"><a href="#"><button class="btn">Back to Home</button></a></div>
 </main>
 
 <footer>© 2025 PDF Chamber. All rights reserved.</footer>
 
 <script>
+// ---- 1. PDF.js worker (critical!) ----
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+// ---- 2. DOM references ----
+const uploadArea       = document.getElementById('uploadArea');
+const fileInput        = document.getElementById('fileInput');
+const previewContainer = document.getElementById('previewContainer');
+const counterBox       = document.getElementById('counterBox');
+const splitBtn         = document.getElementById('splitBtn');
+const downloadBtn      = document.getElementById('downloadBtn');
+
+// ---- 3. Drag & drop / click ----
+uploadArea.addEventListener('click', () => fileInput.click());
+
+['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev, e=>{e.preventDefault();uploadArea.style.borderColor='#2196F3';}));
+['dragleave','dragend','drop'].forEach(ev=>uploadArea.addEventListener(ev, e=>{e.preventDefault();uploadArea.style.borderColor='var(--border-upload)';}));
+uploadArea.addEventListener('drop', e=>handleFile(e.dataTransfer.files[0]));
+fileInput.addEventListener('change', e=>handleFile(e.target.files[0]));
+
+// ---- 4. Main file handler ----
 let uploadedPdf = null;
 let pdfDoc = null;
 let mergedBlobUrl = null;
 
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const previewContainer = document.getElementById('previewContainer');
-const counterBox = document.getElementById('counterBox');
-const splitBtn = document.getElementById('splitBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-
-uploadArea.addEventListener('click', () => fileInput.click());
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor="#2196F3"; });
-uploadArea.addEventListener('dragleave', e => { e.preventDefault(); uploadArea.style.borderColor="var(--border-upload)"; });
-uploadArea.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadArea.style.borderColor="var(--border-upload)";
-  handleFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-async function handleFile(file) {
-  if (!file) return;
+async function handleFile(file){
+  if(!file || file.type!=='application/pdf') return alert('Please select a PDF file');
   uploadedPdf = file;
-  previewContainer.innerHTML = "";
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  pdfDoc = pdf;
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const viewport = page.getViewport({ scale: 0.8 });
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    await page.render({ canvasContext: context, viewport }).promise;
+  previewContainer.innerHTML = '<div class="spinner">Loading PDF…</div>';
+  splitBtn.disabled = downloadBtn.disabled = true;
 
-    const div = document.createElement('div');
-    div.className = 'preview-item';
-    div.innerHTML = `
-      <canvas></canvas>
-      <label><input type="checkbox" checked> Page ${p}</label>
-    `;
-    div.querySelector('canvas').replaceWith(canvas);
-    previewContainer.appendChild(div);
+  try{
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+    pdfDoc = pdf;
+
+    // clear + add master checkbox
+    previewContainer.innerHTML = `
+      <div style="width:100%;margin-bottom:1rem;">
+        <label><input type="checkbox" id="selectAll" checked> <strong>Select all</strong></label>
+      </div>`;
+
+    const selectAll = document.getElementById('selectAll');
+
+    // render each page
+    for(let i=1;i<=pdf.numPages;i++){
+      const page = await pdf.getPage(i);
+      const vp = page.getViewport({scale:0.8});
+
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      const ctx = canvas.getContext('2d');
+      await page.render({canvasContext:ctx, viewport:vp}).promise;
+
+      const div = document.createElement('div');
+      div.className='preview-item';
+      div.innerHTML = `<canvas></canvas>
+        <label><input type="checkbox" data-page="${i}" checked> Page ${i}</label>`;
+      div.querySelector('canvas').replaceWith(canvas);
+      previewContainer.appendChild(div);
+    }
+
+    // master checkbox logic
+    selectAll.addEventListener('change', e=>{
+      previewContainer.querySelectorAll('input[data-page]').forEach(cb=>cb.checked=e.target.checked);
+      updateCounter();
+    });
+    previewContainer.addEventListener('change', e=>{
+      if(e.target.type!=='checkbox' || e.target.id==='selectAll') return;
+      updateCounter();
+    });
+
+    updateCounter();
+    splitBtn.disabled = false;
+  }catch(err){
+    console.error(err);
+    alert('Failed to read PDF. Is it corrupted or password-protected?');
+    previewContainer.innerHTML = '';
   }
-  updateCounter();
-  splitBtn.disabled = false;
 }
 
-function updateCounter() {
-  const selected = previewContainer.querySelectorAll('input:checked').length;
-  const total = previewContainer.querySelectorAll('input').length;
-  counterBox.textContent = `Total Pages: ${total} | Selected: ${selected}`;
+// ---- 5. Counter ----
+function updateCounter(){
+  const total = pdfDoc ? pdfDoc.numPages : 0;
+  const sel   = previewContainer.querySelectorAll('input[data-page]:checked').length;
+  counterBox.textContent = `Total Pages: ${total} | Selected: ${sel}`;
+
+  const master = document.getElementById('selectAll');
+  if(master){
+    const all = previewContainer.querySelectorAll('input[data-page]');
+    master.checked = all.length && Array.from(all).every(c=>c.checked);
+  }
 }
 
-previewContainer.addEventListener('change', updateCounter);
+// ---- 6. Split ----
+splitBtn.addEventListener('click', async ()=>{
+  const indices = Array.from(previewContainer.querySelectorAll('input[data-page]'))
+                 .map((c,i)=>c.checked?i:-1).filter(i=>i>=0);
+  if(!indices.length) return alert('Select at least one page!');
 
-splitBtn.addEventListener('click', async () => {
-  const selected = Array.from(previewContainer.querySelectorAll('input'))
-    .map((input, i) => input.checked ? i : -1)
-    .filter(i => i >= 0);
-  if (!selected.length) return alert("Please select at least one page!");
+  splitBtn.disabled = true;
+  splitBtn.textContent = 'Splitting…';
 
-  const srcBytes = await uploadedPdf.arrayBuffer();
-  const srcDoc = await PDFLib.PDFDocument.load(srcBytes);
-  const newPdf = await PDFLib.PDFDocument.create();
-  for (let pageNum of selected) {
-    const [copiedPage] = await newPdf.copyPages(srcDoc, [pageNum]);
-    newPdf.addPage(copiedPage);
+  try{
+    const srcBytes = await uploadedPdf.arrayBuffer();
+    const srcDoc   = await PDFLib.PDFDocument.load(srcBytes);
+    const newDoc   = await PDFLib.PDFDocument.create();
+
+    for(const idx of indices){
+      const [page] = await newDoc.copyPages(srcDoc, [idx]);
+      newDoc.addPage(page);
+    }
+    const bytes = await newDoc.save();
+
+    if(mergedBlobUrl) URL.revokeObjectURL(mergedBlobUrl);
+    mergedBlobUrl = URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    downloadBtn.disabled = false;
+  }catch(e){
+    console.error(e);
+    alert('Splitting failed.');
+  }finally{
+    splitBtn.disabled = false;
+    splitBtn.textContent = 'Split Selected Pages';
   }
-  const newBytes = await newPdf.save();
-  mergedBlobUrl = URL.createObjectURL(new Blob([newBytes], { type: "application/pdf" }));
-  downloadBtn.disabled = false;
 });
 
-downloadBtn.addEventListener('click', () => {
-  if (!mergedBlobUrl) return;
+// ---- 7. Download ----
+downloadBtn.addEventListener('click', ()=>{
+  if(!mergedBlobUrl) return;
   const a = document.createElement('a');
   a.href = mergedBlobUrl;
-  a.download = 'split.pdf';
+  a.download = `split-${new Date().toISOString().slice(0,10)}.pdf`;
   a.click();
+  setTimeout(()=>URL.revokeObjectURL(mergedBlobUrl),1000);
 });
 
-// Theme toggle
+// ---- 8. Theme toggle ----
 const themeToggle = document.getElementById('themeToggle');
-const setTheme = (theme) => document.documentElement.setAttribute('data-theme', theme);
-const savedTheme = localStorage.getItem('theme') || 'light';
-setTheme(savedTheme);
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
-  setTheme(next);
-  localStorage.setItem('theme', next);
+const setTheme = t=>document.documentElement.setAttribute('data-theme',t);
+const saved = localStorage.getItem('theme')||'light';
+setTheme(saved);
+themeToggle.addEventListener('click',()=>{
+  const next = document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
+  setTheme(next); localStorage.setItem('theme',next);
 });
 </script>
 </body>
