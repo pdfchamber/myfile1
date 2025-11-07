@@ -23,37 +23,38 @@ body {
   flex-direction: column;
   transition: background 0.4s ease;
 }
+
+/* Light Theme Defaults */
 :root {
-  --bg-gradient: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
-  --header-bg: #0F172A;
+  --bg-gradient: linear-gradient(135deg, #aef1fc 0%, #E3F2FD 50%, #90CAF9 100%);
+  --header-bg: #0a8b65;
   --card-bg: #ffffff;
   --text-primary: #002B5B;
   --text-secondary: #455A64;
-  --border-upload: #00AEEF;
   --btn-blue: #2196F3;
   --btn-hover: #1976D2;
   --shadow: rgba(0,0,0,0.08);
-  --progress-bg: #E0E0E0;
-  --footer-bg: #03A9F4;
+  --footer-bg: #0a8b65;
   --footer-text: #ECEFF1;
   --card-glow: var(--glow-light);
 }
+
+/* Dark Mode */
 [data-theme="dark"] {
   --bg-gradient: linear-gradient(135deg, #0D1B2A 0%, #1B263B 50%, #415A77 100%);
-  --header-bg: #0F172A;
+  --header-bg: #0a8b65;
   --card-bg: #1B263B;
   --text-primary: #E0E1DD;
   --text-secondary: #778DA9;
   --btn-blue: #00AEEF;
   --btn-hover: #0088CC;
   --shadow: rgba(0,0,0,0.3);
-  --progress-bg: #415A77;
-  --footer-bg: #0D1B2A;
+  --footer-bg: #0a8b65;
   --footer-text: #E0E1DD;
   --card-glow: var(--glow-dark);
 }
 
-/* Sticky header */
+/* Header */
 header {
   background: var(--header-bg);
   padding: 1rem 5%;
@@ -75,20 +76,104 @@ main { margin-top: 120px; }
   gap: 1rem;
 }
 .logo { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.8rem; color: #FFFFFF; text-decoration: none; }
-.logo svg { width: 48px; height: 48px; fill: #00AEEF; }
+.logo svg { width: 48px; height: 48px; fill: #FFFFFF; }
 .tagline { font-size: 0.95rem; color: #E2E8F0; font-weight: 500; }
-.theme-toggle { width: 56px; height: 30px; background: rgba(255,255,255,0.15); border: 2px solid #00AEEF; border-radius: 50px; position: relative; cursor: pointer; }
-.theme-toggle::before { content: ''; position: absolute; top: 3px; left: 4px; width: 20px; height: 20px; background: #00AEEF; border-radius: 50%; transition: transform 0.3s; }
-[data-theme="dark"] .theme-toggle::before { transform: translateX(24px); background: #1B263B; }
 
+/* Updated Toggle */
+.theme-toggle {
+  width: 56px;
+  height: 30px;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid #ffffff;
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s ease, border 0.3s ease;
+}
+.theme-toggle::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+[data-theme="dark"] .theme-toggle::before {
+  transform: translateX(24px);
+  background: #1B263B;
+}
+
+/* Hero */
 .hero { max-width: 1400px; margin: 2rem auto; padding: 0 5%; text-align: center; }
-.search-bar { display: flex; max-width: 600px; margin: 0 auto 1.5rem; box-shadow: 0 8px 25px var(--shadow); border-radius: 50px; overflow: hidden; background: var(--card-bg); }
-.search-bar input { flex: 1; padding: 1rem 1.5rem; border: none; font-size: 1rem; background: transparent; color: var(--text-primary); }
-.search-bar button { background: var(--btn-blue); color: #fff; border: none; padding: 0 1.8rem; font-weight: 600; }
 
-.upload-area { border: 3px dashed var(--border-upload); border-radius: 16px; padding: 2.5rem 1rem; background: rgba(255,255,255,0.7); max-width: 700px; margin: 1.5rem auto; cursor: pointer; transition: 0.3s; }
-[data-theme="dark"] .upload-area { background: rgba(27,38,59,0.8); }
+/* Search Bar */
+.search-bar {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  border-radius: 50px;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: 0 8px 30px var(--shadow), inset 0 2px 6px rgba(255,255,255,0.3);
+  transition: box-shadow 0.3s ease;
+}
+.search-bar:hover {
+  box-shadow: 0 10px 40px rgba(0, 174, 239, 0.25), inset 0 2px 6px rgba(255,255,255,0.3);
+}
+.search-bar input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  font-size: 1rem;
+  background: transparent;
+  color: var(--text-primary);
+  outline: none;
+}
+.search-bar button {
+  background: linear-gradient(135deg, #059dc2, #00AEEF);
+  color: #fff;
+  border: none;
+  padding: 0 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.search-bar button:hover {
+  background: linear-gradient(135deg, #04b7d8, #21d0f3);
+  box-shadow: 0 0 12px rgba(0,174,239,0.5);
+}
 
+/* Sub-headline */
+.sub-headline {
+  margin-bottom: 2.5rem;
+  text-align: center;
+  animation: fadeUp 0.7s ease both;
+}
+.sub-headline h2 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #74ea00, #00AEEF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+/* ✅ Changed sub-headline paragraph color to header color */
+.sub-headline p {
+  font-size: 1.3rem;
+  color: var(--header-bg);
+  margin: 0.35rem 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tool Grid */
 .tools-grid {
   display: grid;
   gap: 2rem;
@@ -110,36 +195,37 @@ main { margin-top: 120px; }
   transform: translateY(-10px);
   box-shadow: 0 15px 40px var(--card-glow);
 }
+
+/* Glossy Gradient Header */
 .card-icon {
+  position: relative;
   height: 100px;
-  background: linear-gradient(135deg, #00AEEF, #2196F3);
+  background: linear-gradient(135deg, #059dc2, #00AEEF);
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow: hidden;
 }
-.card-icon svg { width: 56px; height: 56px; fill: #fff; }
+.card-icon::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 45%;
+  background: rgba(255, 255, 255, 0.25);
+  mix-blend-mode: overlay;
+  filter: blur(6px);
+}
+.card-icon svg { width: 56px; height: 56px; fill: #fff; position: relative; z-index: 1; }
 
-.card-body {
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-.card-body h3 {
-  font-size: 1.35rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
-.card-body p {
-  flex: 1;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-}
+.card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.card-body h3 { font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+.card-body p { flex: 1; font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
+/* ✅ Header-colored Buttons */
 .card-btn {
-  background: var(--btn-blue);
+  background: var(--header-bg);
   color: #fff;
   border: none;
   padding: 0.65rem 1.5rem;
@@ -149,8 +235,12 @@ main { margin-top: 120px; }
   transition: background 0.3s ease, transform 0.2s ease;
   align-self: center;
 }
-.card-btn:hover { background: var(--btn-hover); transform: scale(1.05); }
+.card-btn:hover {
+  background: #087555;
+  transform: scale(1.05);
+}
 
+/* Footer */
 footer {
   margin-top: auto;
   background: var(--footer-bg);
@@ -167,7 +257,7 @@ footer {
 <header>
   <div class="header-inner">
     <a href="#" class="logo">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
       PDF Chamber
     </a>
     <div style="display:flex; align-items:center; gap:1rem;">
@@ -184,10 +274,10 @@ footer {
       <button id="searchBtn">Search</button>
     </div>
 
-    <div class="upload-area" id="uploadArea">
-      <p>Drag & drop files here or click to upload</p>
-      <button class="upload-btn">Choose File</button>
-      <input type="file" id="fileInput" hidden multiple>
+    <div class="sub-headline">
+      <h2>Work with your documents effortlessly</h2>
+      <p>Read, merge, split, compress, convert, protect, unlock, download, print, and share PDFs in just a few clicks.</p>
+      <p>Every feature is 100% free and designed to be simple, fast, and easy to use.</p>
     </div>
 
     <div class="tools-grid" id="toolsGrid"></div>
@@ -205,97 +295,38 @@ footer {
 </footer>
 
 <script>
-const tools = [
-  {name:"PDF Reader",desc:"Open and view any PDF instantly.",icon:"eye"},
-  {name:"Edit PDF",desc:"Add text, images, highlights.",icon:"edit"},
-  {name:"Crop PDF",desc:"Trim margins or extract pages.",icon:"crop"},
-  {name:"Compress PDF",desc:"Reduce size, keep quality.",icon:"compress"},
-  {name:"PDF to Word",desc:"Convert to editable DOCX.",icon:"word"},
-  {name:"Word to PDF",desc:"Turn Word into secure PDFs.",icon:"pdf"},
-  {name:"JPG to PDF",desc:"Images to high-quality PDFs.",icon:"image"},
-  {name:"PDF to JPG",desc:"Export pages as images.",icon:"export"},
-  {name:"Scan to PDF",desc:"Scan paper to digital PDF.",icon:"scan"},
-  {name:"Merge PDF",desc:"Combine multiple files.",icon:"merge"},
-  {name:"Split PDF",desc:"Break into separate pages.",icon:"split"},
-  {name:"Organize PDF",desc:"Rearrange, rotate, delete.",icon:"organize"},
-  {name:"Sign PDF",desc:"Add e-signatures securely.",icon:"sign"},
-  {name:"Protect PDF",desc:"Password & encryption.",icon:"lock"},
-  {name:"Unlock PDF",desc:"Remove password protection.",icon:"unlock"}
-];
-
-const icons = {
-  eye:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z",
-  edit:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z",
-  crop:"M19 7h-3V5h-2v2H5v12h12v-2h2v-2h2V7h-2z",
-  compress:"M12 8l-6 6h4v6h4v-6h4l-6-6z",
-  word:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6z",
-  pdf:"M12 2H6c-1.1 0-2 .9-2 2v16h6V2zm8 8h-8v2h8zm0 4h-8v2h8z",
-  image:"M21 19V5H3v14h18zM5 7h14v8l-3.5-3.5-2.5 2.5-4-4L5 15V7z",
-  export:"M5 20h14v-2H5v2zM12 2L6.5 7.5 8 9l3-3v8h2V6l3 3 1.5-1.5L12 2z",
-  scan:"M4 6h16v2H4zM4 16h16v2H4zM6 10h12v4H6z",
-  merge:"M7 7h10v2H7zM7 15h10v2H7zM11 11h2v2h-2z",
-  split:"M3 12l7-9v5h8v8h-8v5l-7-9z",
-  organize:"M3 5h18v2H3zM3 11h12v2H3zM3 17h6v2H3z",
-  sign:"M2 21h20v2H2zM12 2L2 12h3v6h6v-6h3l6-6H12z",
-  lock:"M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-6h-1V9a5 5 0 0 0-10 0v2H6v10h12V11z",
-  unlock:"M18 8h-1V6a5 5 0 0 0-10 0h2a3 3 0 0 1 6 0v2H6v10h12V8z"
-};
-
-const grid = document.getElementById('toolsGrid');
-tools.forEach(t => {
-  const card = document.createElement('div');
-  card.className = 'tool-card';
-  card.innerHTML = `
-    <div class="card-icon"><svg viewBox="0 0 24 24"><path d="${icons[t.icon]}"/></svg></div>
-    <div class="card-body">
-      <h3>${t.name}</h3>
-      <p>${t.desc}</p>
-      <button class="card-btn" data-tool="${t.name}">Use Tool</button>
-    </div>`;
+const tools=[{name:"PDF Reader",desc:"Open and view any PDF instantly.",icon:"eye"},{name:"Edit PDF",desc:"Add text, images, highlights.",icon:"edit"},{name:"Crop PDF",desc:"Trim margins or extract pages.",icon:"crop"},{name:"Compress PDF",desc:"Reduce size, keep quality.",icon:"compress"},{name:"PDF to Word",desc:"Convert to editable DOCX.",icon:"word"},{name:"Word to PDF",desc:"Turn Word into secure PDFs.",icon:"pdf"},{name:"JPG to PDF",desc:"Images to high-quality PDFs.",icon:"image"},{name:"PDF to JPG",desc:"Export pages as images.",icon:"export"},{name:"Scan to PDF",desc:"Scan paper to digital PDF.",icon:"scan"},{name:"Merge PDF",desc:"Combine multiple files.",icon:"merge"},{name:"Split PDF",desc:"Break into separate pages.",icon:"split"},{name:"Organize PDF",desc:"Rearrange, rotate, delete.",icon:"organize"},{name:"Sign PDF",desc:"Add e-signatures securely.",icon:"sign"},{name:"Protect PDF",desc:"Password & encryption.",icon:"lock"},{name:"Unlock PDF",desc:"Remove password protection.",icon:"unlock"}];
+const icons={eye:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z",edit:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z",crop:"M19 7h-3V5h-2v2H5v12h12v-2h2v-2h2V7h-2z",compress:"M12 8l-6 6h4v6h4v-6h4l-6-6z",word:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6z",pdf:"M12 2H6c-1.1 0-2 .9-2 2v16h6V2zm8 8h-8v2h8zm0 4h-8v2h8z",image:"M21 19V5H3v14h18zM5 7h14v8l-3.5-3.5-2.5 2.5-4-4L5 15V7z",export:"M5 20h14v-2H5v2zM12 2L6.5 7.5 8 9l3-3v8h2V6l3 3 1.5-1.5L12 2z",scan:"M4 6h16v2H4zM4 16h16v2H4zM6 10h12v4H6z",merge:"M7 7h10v2H7zM7 15h10v2H7zM11 11h2v2h-2z",split:"M3 12l7-9v5h8v8h-8v5l-7-9z",organize:"M3 5h18v2H3zM3 11h12v2H3zM3 17h6v2H3z",sign:"M2 21h20v2H2zM12 2L2 12h3v6h6v-6h3l6-6H12z",lock:"M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-6h-1V9a5 5 0 0 0-10 0v2H6v10h12V11z",unlock:"M18 8h-1V6a5 5 0 0 0-10 0h2a3 3 0 0 1 6 0v2H6v10h12V8z"};
+const grid=document.getElementById('toolsGrid');
+tools.forEach(t=>{
+  const card=document.createElement('div');
+  card.className='tool-card';
+  card.innerHTML=`<div class="card-icon"><svg viewBox="0 0 24 24"><path d="${icons[t.icon]}"/></svg></div>
+  <div class="card-body"><h3>${t.name}</h3><p>${t.desc}</p><button class="card-btn" data-tool="${t.name}">Use Tool</button></div>`;
   grid.appendChild(card);
 });
-
-document.addEventListener('click', e => {
-  if (e.target.matches('.card-btn')) {
-    const tool = e.target.dataset.tool;
-    const toolPages = {
-      "PDF Reader": "pdf-reader.html",
-      "Merge PDF": "merge-pdf.html",
-      "Split PDF": "split-pdf.html"
-    };
-    if (toolPages[tool]) window.location.href = toolPages[tool];
+document.addEventListener('click',e=>{
+  if(e.target.matches('.card-btn')){
+    const tool=e.target.dataset.tool;
+    const toolPages={"PDF Reader":"pdf-reader.html","Merge PDF":"merge-pdf.html","Split PDF":"split-pdf.html"};
+    if(toolPages[tool])window.location.href=toolPages[tool];
     else alert(`${tool} tool coming soon!`);
   }
 });
-
-const themeToggle = document.getElementById('themeToggle');
-const setTheme = (t) => document.documentElement.setAttribute('data-theme', t);
-setTheme(localStorage.getItem('theme') || 'light');
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
+const themeToggle=document.getElementById('themeToggle');
+const setTheme=t=>document.documentElement.setAttribute('data-theme',t);
+setTheme(localStorage.getItem('theme')||'light');
+themeToggle.addEventListener('click',()=>{
+  const current=document.documentElement.getAttribute('data-theme');
+  const next=current==='light'?'dark':'light';
   setTheme(next);
-  localStorage.setItem('theme', next);
+  localStorage.setItem('theme',next);
 });
-
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-uploadArea.addEventListener('click', () => fileInput.click());
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = "#2196F3"; });
-uploadArea.addEventListener('dragleave', e => { e.preventDefault(); uploadArea.style.borderColor = "var(--border-upload)"; });
-uploadArea.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadArea.style.borderColor = "var(--border-upload)";
-  fileInput.files = e.dataTransfer.files;
-  alert(fileInput.files.length + " file(s) selected");
-});
-fileInput.addEventListener('change', () => alert(fileInput.files.length + " file(s) selected"));
-
-document.getElementById('searchBtn').addEventListener('click', () => {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('.tool-card').forEach(c => {
-    const name = c.querySelector('h3').textContent.toLowerCase();
-    c.style.display = name.includes(query) ? 'flex' : 'none';
+document.getElementById('searchBtn').addEventListener('click',()=>{
+  const query=document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.tool-card').forEach(card=>{
+    const title=card.querySelector('h3').textContent.toLowerCase();
+    card.style.display=title.includes(query)?'flex':'none';
   });
 });
 </script>
