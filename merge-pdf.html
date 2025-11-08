@@ -6,65 +6,245 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- PDF.js (thumbnails) -->
+<!-- PDF.js (for thumbnails) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<!-- PDF-Lib (merge) -->
+<!-- PDF-Lib (for merging) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
 <style>
-:root{--focus:#00AEEF;--transition:all .3s ease;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--bg-gradient);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column;}
-:root{
+:root {
+  --focus:#00AEEF;
+  --transition:all 0.3s ease;
   --bg-gradient:linear-gradient(135deg,#E3F2FD 0%,#BBDEFB 50%,#90CAF9 100%);
-  --header-bg:#0F172A;--card-bg:#fff;--text-primary:#002B5B;--text-secondary:#455A64;
-  --btn-blue:#2196F3;--btn-hover:#1976D2;--footer-bg:#03A9F4;--footer-text:#ECEFF1;--border-upload:#00AEEF;
+  --header-bg:#0a8b65;
+  --card-bg:#ffffff;
+  --text-primary:#002B5B;
+  --text-secondary:#455A64;
+  --btn-green:#0a8b65;
+  --btn-hover:#087555;
+  --footer-bg:#0a8b65;
+  --footer-text:#ECEFF1;
+  --border-upload:#0a8b65;
 }
-[data-theme="dark"]{
+[data-theme="dark"] {
   --bg-gradient:linear-gradient(135deg,#0D1B2A 0%,#1B263B 50%,#415A77 100%);
-  --header-bg:#0F172A;--card-bg:#1B263B;--text-primary:#E0E1DD;--text-secondary:#AAB4BE;
-  --btn-blue:#00AEEF;--btn-hover:#0099CC;--footer-bg:#0D1B2A;--footer-text:#E0E1DD;
+  --header-bg:#0a8b65;
+  --card-bg:#1B263B;
+  --text-primary:#E0E1DD;
+  --text-secondary:#AAB4BE;
+  --btn-green:#0a8b65;
+  --btn-hover:#0b7050;
+  --footer-bg:#0a8b65;
+  --footer-text:#E0E1DD;
+  --border-upload:#0a8b65;
 }
-header{background:var(--header-bg);color:#fff;padding:1rem 5%;display:flex;justify-content:space-between;align-items:center;}
-.logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.8rem;color:#fff;text-decoration:none;}
-.logo svg{width:40px;height:40px;fill:#00AEEF;}
-.tagline{font-size:.9rem;color:#E0E1DD;}
-.theme-toggle{width:56px;height:30px;background:rgba(255,255,255,.15);border:2px solid #00AEEF;border-radius:50px;position:relative;cursor:pointer;}
-.theme-toggle::before{content:'';position:absolute;top:3px;left:4px;width:20px;height:20px;background:#00AEEF;border-radius:50%;transition:transform .3s;}
-[data-theme="dark"] .theme-toggle::before{transform:translateX(24px);background:#1B263B;}
-main{flex:1;max-width:1200px;margin:2rem auto;padding:0 5%;text-align:center;}
-.upload-area{border:3px dashed var(--border-upload);border-radius:16px;padding:2rem 1rem;background:rgba(255,255,255,.7);cursor:pointer;margin-bottom:1.5rem;}
-.upload-area p{color:var(--text-primary);margin-bottom:.5rem;font-size:1.1rem;}
-.upload-btn{background:var(--btn-blue);color:#fff;border:none;padding:.75rem 2rem;border-radius:50px;font-weight:600;cursor:pointer;}
-.preview-container{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:1.5rem;max-height:400px;overflow-y:auto;}
-.preview-item{background:var(--card-bg);border:1px solid var(--border-upload);border-radius:8px;padding:.5rem;box-shadow:0 2px 6px rgba(0,0,0,.1);}
-.preview-item canvas{width:120px;height:auto;display:block;margin-bottom:.3rem;}
-.preview-item label{font-size:.85rem;display:flex;align-items:center;gap:.25rem;justify-content:center;}
-.counter-box{background:var(--card-bg);padding:1rem;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);max-width:400px;margin:0.5rem auto 1.5rem;color:var(--text-secondary);}
-.btn{background:var(--btn-blue);color:#fff;border:none;padding:.8rem 2rem;border-radius:8px;font-weight:600;cursor:pointer;margin:.5rem;}
-.btn:hover{background:var(--btn-hover);}
-.btn:disabled{opacity:.5;cursor:not-allowed;}
-footer{background:var(--footer-bg);color:var(--footer-text);text-align:center;padding:1.5rem 5%;font-size:.9rem;margin-top:auto;}
-.back-home{display:flex;justify-content:center;margin-top:1.5rem;}
-.spinner{margin:2rem 0;font-style:italic;color:#777;}
+
+*,*::before,*::after {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--bg-gradient);
+  color:var(--text-primary);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Header */
+header {
+  background:var(--header-bg);
+  color:#fff;
+  padding:1rem 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo {
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  font-weight:700;
+  font-size:1.8rem;
+  color:#fff;
+  text-decoration:none;
+}
+.logo svg {width:40px;height:40px;fill:#fff;}
+.theme-toggle {
+  width:56px;
+  height:30px;
+  background:rgba(255,255,255,.15);
+  border:2px solid #ffffff;
+  border-radius:50px;
+  position:relative;
+  cursor:pointer;
+}
+.theme-toggle::before {
+  content:'';
+  position:absolute;
+  top:3px;
+  left:4px;
+  width:20px;
+  height:20px;
+  background:#ffffff;
+  border-radius:50%;
+  transition:transform 0.3s;
+}
+[data-theme="dark"] .theme-toggle::before {
+  transform:translateX(24px);
+  background:#1B263B;
+}
+
+/* Main */
+main {
+  flex:1;
+  max-width:1200px;
+  margin:2rem auto;
+  padding:0 5%;
+  text-align:center;
+}
+
+.sub-headline {
+  color:var(--header-bg);
+  font-size:1rem;
+  margin-top:-0.5rem;
+  margin-bottom:1.5rem;
+  line-height:1.4;
+}
+.sub-headline p {margin:0.2rem 0;}
+
+/* Upload Area */
+.upload-area {
+  border:3px dashed var(--border-upload);
+  border-radius:16px;
+  padding:2rem 1rem;
+  background:rgba(255,255,255,0.8);
+  cursor:pointer;
+  margin-bottom:1.5rem;
+}
+.upload-area p {
+  color:var(--text-primary);
+  margin-bottom:.5rem;
+  font-size:1.1rem;
+}
+.upload-btn {
+  background:var(--btn-green);
+  color:#fff;
+  border:none;
+  padding:.75rem 2rem;
+  border-radius:50px;
+  font-weight:600;
+  cursor:pointer;
+  transition:var(--transition);
+}
+.upload-btn:hover {
+  background:var(--btn-hover);
+  transform:scale(1.05);
+}
+
+/* Preview */
+.preview-container {
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+  justify-content:center;
+  margin-top:1.5rem;
+  max-height:400px;
+  overflow-y:auto;
+}
+.preview-item {
+  background:var(--card-bg);
+  border:1px solid var(--border-upload);
+  border-radius:8px;
+  padding:.5rem;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.preview-item canvas {
+  width:120px;
+  height:auto;
+  display:block;
+  margin-bottom:.3rem;
+}
+.preview-item label {
+  font-size:.85rem;
+  display:flex;
+  align-items:center;
+  gap:.25rem;
+  justify-content:center;
+}
+
+/* Counter */
+.counter-box {
+  background:var(--card-bg);
+  padding:1rem;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+  max-width:400px;
+  margin:0.5rem auto 1.5rem;
+  color:var(--text-secondary);
+}
+
+/* Buttons */
+.btn {
+  background:var(--btn-green);
+  color:#fff;
+  border:none;
+  padding:.8rem 2rem;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  margin:.5rem;
+  transition:var(--transition);
+}
+.btn:hover {
+  background:var(--btn-hover);
+  transform:scale(1.05);
+}
+.btn:disabled {
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+/* Footer */
+footer {
+  background:var(--footer-bg);
+  color:var(--footer-text);
+  text-align:center;
+  padding:1.5rem 5%;
+  font-size:.9rem;
+  margin-top:auto;
+}
+.back-home {
+  display:flex;
+  justify-content:center;
+  margin-top:1.5rem;
+}
+.spinner {
+  margin:2rem 0;
+  font-style:italic;
+  color:#777;
+}
 </style>
 </head>
 
 <body>
 <header>
-  <a href="#" class="logo">
+  <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
     PDF Chamber
   </a>
-  <div style="display:flex;align-items:center;gap:1rem;">
-    <div class="tagline">Smart PDFs, Seamless Productivity</div>
-    <div class="theme-toggle" id="themeToggle"></div>
-  </div>
+  <div class="theme-toggle" id="themeToggle"></div>
 </header>
 
 <main>
   <h1>Merge PDF Files</h1>
-  <p>Select and merge multiple PDFs into one document.</p>
+  <div class="sub-headline">
+    <p>Your ultimate online PDF tools hub.</p>
+    <p>Merge multiple PDF files into a single document effortlessly.</p>
+  </div>
 
   <div class="upload-area" id="uploadArea">
     <p>Drag & drop PDFs here or click to upload</p>
@@ -82,161 +262,142 @@ footer{background:var(--footer-bg);color:var(--footer-text);text-align:center;pa
   <button class="btn" id="downloadBtn" disabled>Download Merged PDF</button>
 
   <div class="back-home">
-    <a href="#"><button class="btn">Back to Home</button></a>
+    <a href="index.html"><button class="btn">Back to Home</button></a>
   </div>
 </main>
 
 <footer>© 2025 PDF Chamber. All rights reserved.</footer>
 
 <script>
-// --- 1. PDF.js worker ---
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+// PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-// --- 2. State ---
-let uploadedFiles = [];        // File objects
-let pageInfo = [];             // { fileIndex, pageIndex, pdfDoc (PDF.js), numPages }
-let mergedBlobUrl = null;
+let uploadedFiles=[],pageInfo=[],mergedBlobUrl=null;
+const uploadArea=document.getElementById('uploadArea');
+const fileInput=document.getElementById('fileInput');
+const previewContainer=document.getElementById('previewContainer');
+const counterBox=document.getElementById('counterBox');
+const mergeBtn=document.getElementById('mergeBtn');
+const downloadBtn=document.getElementById('downloadBtn');
 
-// --- 3. DOM ---
-const uploadArea       = document.getElementById('uploadArea');
-const fileInput        = document.getElementById('fileInput');
-const previewContainer = document.getElementById('previewContainer');
-const counterBox       = document.getElementById('counterBox');
-const mergeBtn         = document.getElementById('mergeBtn');
-const downloadBtn      = document.getElementById('downloadBtn');
+// Drag/drop
+uploadArea.addEventListener('click',()=>fileInput.click());
+['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.style.borderColor='var(--btn-green)';}));
+['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.style.borderColor='var(--border-upload)';}));
+uploadArea.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change',e=>handleFiles(e.target.files));
 
-// --- 4. Drag & drop ---
-uploadArea.addEventListener('click', () => fileInput.click());
-['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev, e=>{e.preventDefault();uploadArea.style.borderColor='#2196F3';}));
-['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev, e=>{e.preventDefault();uploadArea.style.borderColor='var(--border-upload)';}));
-uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
+async function handleFiles(files){
+  if(!files?.length)return;
+  uploadedFiles=Array.from(files);
+  pageInfo=[];
+  previewContainer.innerHTML='<div class="spinner">Loading PDFs…</div>';
+  mergeBtn.disabled=downloadBtn.disabled=true;
+  let totalPages=0;
 
-// --- 5. Handle files + render thumbnails ---
-async function handleFiles(files) {
-  if (!files?.length) return;
-  uploadedFiles = Array.from(files);
-  pageInfo = [];
-  previewContainer.innerHTML = '<div class="spinner">Loading PDFs…</div>';
-  mergeBtn.disabled = downloadBtn.disabled = true;
+  for(let fIdx=0;fIdx<uploadedFiles.length;fIdx++){
+    const file=uploadedFiles[fIdx];
+    const arrayBuffer=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
 
-  let totalPages = 0;
-  for (let fIdx = 0; fIdx < uploadedFiles.length; fIdx++) {
-    const file = uploadedFiles[fIdx];
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const vp=page.getViewport({scale:0.8});
+      const canvas=document.createElement('canvas');
+      canvas.width=vp.width;canvas.height=vp.height;
+      const ctx=canvas.getContext('2d');
+      await page.render({canvasContext:ctx,viewport:vp}).promise;
 
-    for (let p = 1; p <= pdf.numPages; p++) {
-      const page = await pdf.getPage(p);
-      const vp = page.getViewport({ scale: 0.8 });
-      const canvas = document.createElement('canvas');
-      canvas.width = vp.width; canvas.height = vp.height;
-      const ctx = canvas.getContext('2d');
-      await page.render({ canvasContext: ctx, viewport: vp }).promise;
-
-      const div = document.createElement('div');
-      div.className = 'preview-item';
-      div.innerHTML = `
+      const div=document.createElement('div');
+      div.className='preview-item';
+      div.innerHTML=`
         <canvas></canvas>
         <label><input type="checkbox" checked data-file="${fIdx}" data-page="${p}"> Page ${p} (File ${fIdx+1})</label>
       `;
       div.querySelector('canvas').replaceWith(canvas);
       previewContainer.appendChild(div);
 
-      pageInfo.push({ fileIndex: fIdx, pageIndex: p, pdfDoc: pdf, numPages: pdf.numPages });
+      pageInfo.push({fileIndex:fIdx,pageIndex:p,pdfDoc:pdf,numPages:pdf.numPages});
       totalPages++;
     }
   }
 
-  // Add master checkbox
-  const master = document.createElement('div');
-  master.style.marginBottom = '1rem';
-  master.innerHTML = `<label><input type="checkbox" id="selectAll" checked> <strong>Select all</strong></label>`;
-  previewContainer.insertBefore(master, previewContainer.firstChild);
+  const master=document.createElement('div');
+  master.style.marginBottom='1rem';
+  master.innerHTML=`<label><input type="checkbox" id="selectAll" checked> <strong>Select all</strong></label>`;
+  previewContainer.insertBefore(master,previewContainer.firstChild);
 
-  document.getElementById('selectAll').addEventListener('change', e => {
-    previewContainer.querySelectorAll('input[data-file]').forEach(cb => cb.checked = e.target.checked);
+  document.getElementById('selectAll').addEventListener('change',e=>{
+    previewContainer.querySelectorAll('input[data-file]').forEach(cb=>cb.checked=e.target.checked);
     updateCounter();
   });
-
-  previewContainer.addEventListener('change', e => {
-    if (e.target.type !== 'checkbox' || e.target.id === 'selectAll') return;
+  previewContainer.addEventListener('change',e=>{
+    if(e.target.type!=='checkbox'||e.target.id==='selectAll')return;
     updateCounter();
   });
 
   updateCounter();
-  mergeBtn.disabled = false;
+  mergeBtn.disabled=false;
   previewContainer.querySelector('.spinner')?.remove();
 }
 
-// --- 6. Counter ---
-function updateCounter() {
-  const totalFiles = uploadedFiles.length;
-  const totalPages = pageInfo.length;
-  const selected = previewContainer.querySelectorAll('input[data-file]:checked').length;
-  counterBox.textContent = `Uploaded: ${totalFiles} PDFs | Total Pages: ${totalPages} | Selected: ${selected}`;
-
-  const master = document.getElementById('selectAll');
-  if (master) {
-    const all = previewContainer.querySelectorAll('input[data-file]');
-    master.checked = all.length && Array.from(all).every(c => c.checked);
+function updateCounter(){
+  const totalFiles=uploadedFiles.length;
+  const totalPages=pageInfo.length;
+  const selected=previewContainer.querySelectorAll('input[data-file]:checked').length;
+  counterBox.textContent=`Uploaded: ${totalFiles} PDFs | Total Pages: ${totalPages} | Selected: ${selected}`;
+  const master=document.getElementById('selectAll');
+  if(master){
+    const all=previewContainer.querySelectorAll('input[data-file]');
+    master.checked=all.length&&Array.from(all).every(c=>c.checked);
   }
 }
 
-// --- 7. Merge ---
-mergeBtn.addEventListener('click', async () => {
-  const checked = previewContainer.querySelectorAll('input[data-file]:checked');
-  if (!checked.length) return alert('Select at least one page!');
-
-  mergeBtn.disabled = true;
-  mergeBtn.textContent = 'Merging…';
-
-  const mergedPdf = await PDFLib.PDFDocument.create();
-
-  // Group by file to avoid re-loading
-  const filePageMap = {};
-  checked.forEach(cb => {
-    const fIdx = cb.dataset.file;
-    if (!filePageMap[fIdx]) filePageMap[fIdx] = [];
-    filePageMap[fIdx].push(parseInt(cb.dataset.page) - 1); // 0-based
+mergeBtn.addEventListener('click',async()=>{
+  const checked=previewContainer.querySelectorAll('input[data-file]:checked');
+  if(!checked.length)return alert('Select at least one page!');
+  mergeBtn.disabled=true;
+  mergeBtn.textContent='Merging…';
+  const mergedPdf=await PDFLib.PDFDocument.create();
+  const filePageMap={};
+  checked.forEach(cb=>{
+    const fIdx=cb.dataset.file;
+    if(!filePageMap[fIdx])filePageMap[fIdx]=[];
+    filePageMap[fIdx].push(parseInt(cb.dataset.page)-1);
   });
-
-  for (const [fIdx, pages] of Object.entries(filePageMap)) {
-    const file = uploadedFiles[fIdx];
-    const srcBytes = await file.arrayBuffer();
-    const srcDoc = await PDFLib.PDFDocument.load(srcBytes);
-    const copiedPages = await mergedPdf.copyPages(srcDoc, pages);
-    copiedPages.forEach(p => mergedPdf.addPage(p));
+  for(const [fIdx,pages] of Object.entries(filePageMap)){
+    const file=uploadedFiles[fIdx];
+    const srcBytes=await file.arrayBuffer();
+    const srcDoc=await PDFLib.PDFDocument.load(srcBytes);
+    const copiedPages=await mergedPdf.copyPages(srcDoc,pages);
+    copiedPages.forEach(p=>mergedPdf.addPage(p));
   }
-
-  const bytes = await mergedPdf.save();
-  if (mergedBlobUrl) URL.revokeObjectURL(mergedBlobUrl);
-  mergedBlobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
-  downloadBtn.disabled = false;
-
-  mergeBtn.disabled = false;
-  mergeBtn.textContent = 'Merge Selected';
+  const bytes=await mergedPdf.save();
+  if(mergedBlobUrl)URL.revokeObjectURL(mergedBlobUrl);
+  mergedBlobUrl=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+  downloadBtn.disabled=false;
+  mergeBtn.disabled=false;
+  mergeBtn.textContent='Merge Selected';
 });
 
-// --- 8. Download ---
-downloadBtn.addEventListener('click', () => {
-  if (!mergedBlobUrl) return;
-  const a = document.createElement('a');
-  a.href = mergedBlobUrl;
-  a.download = `merged-${new Date().toISOString().slice(0,10)}.pdf`;
+downloadBtn.addEventListener('click',()=>{
+  if(!mergedBlobUrl)return;
+  const a=document.createElement('a');
+  a.href=mergedBlobUrl;
+  a.download=`merged-${new Date().toISOString().slice(0,10)}.pdf`;
   a.click();
-  setTimeout(() => URL.revokeObjectURL(mergedBlobUrl), 1000);
+  setTimeout(()=>URL.revokeObjectURL(mergedBlobUrl),1000);
 });
 
-// --- 9. Theme ---
-const themeToggle = document.getElementById('themeToggle');
-const setTheme = t => document.documentElement.setAttribute('data-theme', t);
-const saved = localStorage.getItem('theme') || 'light';
-setTheme(saved);
-themeToggle.addEventListener('click', () => {
-  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  setTheme(next);
-  localStorage.setItem('theme', next);
+// Theme toggle
+const toggle=document.getElementById('themeToggle');
+const html=document.documentElement;
+if(localStorage.theme==='dark'||(!localStorage.theme&&window.matchMedia('(prefers-color-scheme:dark)').matches)){
+  html.dataset.theme='dark';
+}
+toggle.addEventListener('click',()=>{
+  html.dataset.theme=html.dataset.theme==='dark'?'light':'dark';
+  localStorage.theme=html.dataset.theme;
 });
 </script>
 </body>
