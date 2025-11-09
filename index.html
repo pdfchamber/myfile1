@@ -339,27 +339,37 @@ tools.forEach(t=>{
   grid.appendChild(card);
 });
 
+// ✅ Tool page links
 document.addEventListener('click',e=>{
   if(e.target.matches('.card-btn')){
     const tool=e.target.dataset.tool;
     const toolPages={
       "PDF Reader":"pdf-reader.html",
       "Merge PDF":"merge-pdf.html",
-      "Split PDF":"split-pdf.html"  // ✅ Correct working link
+      "Split PDF":"split-pdf.html",
+      "Compress PDF":"compress-pdf.html"  // ✅ Added link
     };
     if(toolPages[tool])window.location.href=toolPages[tool];
     else alert(`${tool} tool coming soon!`);
   }
 });
 
+// Theme toggle
 const themeToggle=document.getElementById('themeToggle');
 const setTheme=t=>document.documentElement.setAttribute('data-theme',t);
 setTheme(localStorage.getItem('theme')||'light');
 themeToggle.addEventListener('click',()=>{
-  const current=document.documentElement.getAttribute('data-theme');
-  const next=current==='light'?'dark':'light';
-  setTheme(next);
-  localStorage.setItem('theme',next);
+  const newTheme=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  setTheme(newTheme);
+  localStorage.setItem('theme',newTheme);
+});
+
+// Search Filter
+document.getElementById('searchInput').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  document.querySelectorAll('.tool-card').forEach(c=>{
+    c.style.display=c.innerText.toLowerCase().includes(q)?'':'none';
+  });
 });
 </script>
 </body>
