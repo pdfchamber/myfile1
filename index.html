@@ -79,7 +79,7 @@ main { margin-top: 120px; }
 .logo svg { width: 48px; height: 48px; fill: #FFFFFF; }
 .tagline { font-size: 0.95rem; color: #E2E8F0; font-weight: 500; }
 
-/* Updated Toggle */
+/* Theme Toggle */
 .theme-toggle {
   width: 56px;
   height: 30px;
@@ -161,13 +161,11 @@ main { margin-top: 120px; }
   -webkit-text-fill-color: transparent;
   margin-bottom: 1rem;
 }
-/* ✅ Changed sub-headline paragraph color to header color */
 .sub-headline p {
   font-size: 1.3rem;
   color: var(--header-bg);
   margin: 0.35rem 0;
 }
-
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -196,7 +194,7 @@ main { margin-top: 120px; }
   box-shadow: 0 15px 40px var(--card-glow);
 }
 
-/* Glossy Gradient Header */
+/* Card Header */
 .card-icon {
   position: relative;
   height: 100px;
@@ -223,7 +221,6 @@ main { margin-top: 120px; }
 .card-body h3 { font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary); }
 .card-body p { flex: 1; font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem; }
 
-/* ✅ Header-colored Buttons */
 .card-btn {
   background: var(--header-bg);
   color: #fff;
@@ -295,7 +292,23 @@ footer {
 </footer>
 
 <script>
-const tools=[{name:"PDF Reader",desc:"Open and view any PDF instantly.",icon:"eye"},{name:"Edit PDF",desc:"Add text, images, highlights.",icon:"edit"},{name:"Crop PDF",desc:"Trim margins or extract pages.",icon:"crop"},{name:"Compress PDF",desc:"Reduce size, keep quality.",icon:"compress"},{name:"PDF to Word",desc:"Convert to editable DOCX.",icon:"word"},{name:"Word to PDF",desc:"Turn Word into secure PDFs.",icon:"pdf"},{name:"JPG to PDF",desc:"Images to high-quality PDFs.",icon:"image"},{name:"PDF to JPG",desc:"Export pages as images.",icon:"export"},{name:"Scan to PDF",desc:"Scan paper to digital PDF.",icon:"scan"},{name:"Merge PDF",desc:"Combine multiple files.",icon:"merge"},{name:"Split PDF",desc:"Break into separate pages.",icon:"split"},{name:"Organize PDF",desc:"Rearrange, rotate, delete.",icon:"organize"},{name:"Sign PDF",desc:"Add e-signatures securely.",icon:"sign"},{name:"Protect PDF",desc:"Password & encryption.",icon:"lock"},{name:"Unlock PDF",desc:"Remove password protection.",icon:"unlock"}];
+const tools=[
+  {name:"PDF Reader",desc:"Open and view any PDF instantly.",icon:"eye"},
+  {name:"Edit PDF",desc:"Add text, images, highlights.",icon:"edit"},
+  {name:"Crop PDF",desc:"Trim margins or extract pages.",icon:"crop"},
+  {name:"Compress PDF",desc:"Reduce size, keep quality.",icon:"compress"},
+  {name:"PDF to Word",desc:"Convert to editable DOCX.",icon:"word"},
+  {name:"Word to PDF",desc:"Turn Word into secure PDFs.",icon:"pdf"},
+  {name:"JPG to PDF",desc:"Images to high-quality PDFs.",icon:"image"},
+  {name:"PDF to JPG",desc:"Export pages as images.",icon:"export"},
+  {name:"Scan to PDF",desc:"Scan paper to digital PDF.",icon:"scan"},
+  {name:"Merge PDF",desc:"Combine multiple files.",icon:"merge"},
+  {name:"Split PDF",desc:"Break into separate pages.",icon:"split"},
+  {name:"Organize PDF",desc:"Rearrange, rotate, delete.",icon:"organize"},
+  {name:"Sign PDF",desc:"Add e-signatures securely.",icon:"sign"},
+  {name:"Protect PDF",desc:"Password & encryption.",icon:"lock"},
+  {name:"Unlock PDF",desc:"Remove password protection.",icon:"unlock"}
+];
 const icons={eye:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z",edit:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z",crop:"M19 7h-3V5h-2v2H5v12h12v-2h2v-2h2V7h-2z",compress:"M12 8l-6 6h4v6h4v-6h4l-6-6z",word:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6z",pdf:"M12 2H6c-1.1 0-2 .9-2 2v16h6V2zm8 8h-8v2h8zm0 4h-8v2h8z",image:"M21 19V5H3v14h18zM5 7h14v8l-3.5-3.5-2.5 2.5-4-4L5 15V7z",export:"M5 20h14v-2H5v2zM12 2L6.5 7.5 8 9l3-3v8h2V6l3 3 1.5-1.5L12 2z",scan:"M4 6h16v2H4zM4 16h16v2H4zM6 10h12v4H6z",merge:"M7 7h10v2H7zM7 15h10v2H7zM11 11h2v2h-2z",split:"M3 12l7-9v5h8v8h-8v5l-7-9z",organize:"M3 5h18v2H3zM3 11h12v2H3zM3 17h6v2H3z",sign:"M2 21h20v2H2zM12 2L2 12h3v6h6v-6h3l6-6H12z",lock:"M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-6h-1V9a5 5 0 0 0-10 0v2H6v10h12V11z",unlock:"M18 8h-1V6a5 5 0 0 0-10 0h2a3 3 0 0 1 6 0v2H6v10h12V8z"};
 const grid=document.getElementById('toolsGrid');
 tools.forEach(t=>{
@@ -305,29 +318,27 @@ tools.forEach(t=>{
   <div class="card-body"><h3>${t.name}</h3><p>${t.desc}</p><button class="card-btn" data-tool="${t.name}">Use Tool</button></div>`;
   grid.appendChild(card);
 });
+
 document.addEventListener('click',e=>{
   if(e.target.matches('.card-btn')){
     const tool=e.target.dataset.tool;
-    const toolPages={"PDF Reader":"pdf-reader.html","Merge PDF":"merge-pdf.html","Split PDF":"split-pdf.html"};
-    if(toolPages[tool])window.location.href=toolPages[tool];
+    // ✅ Link to working tool pages
+    const toolPages={
+      "PDF Reader":"pdf-reader.html",
+      "Merge PDF":"merge-pdf.html",
+      "Split PDF":"split-pdf.html"
+    };
+    if(toolPages[tool]) window.location.href=toolPages[tool];
     else alert(`${tool} tool coming soon!`);
   }
 });
+
 const themeToggle=document.getElementById('themeToggle');
 const setTheme=t=>document.documentElement.setAttribute('data-theme',t);
 setTheme(localStorage.getItem('theme')||'light');
 themeToggle.addEventListener('click',()=>{
-  const current=document.documentElement.getAttribute('data-theme');
-  const next=current==='light'?'dark':'light';
-  setTheme(next);
-  localStorage.setItem('theme',next);
-});
-document.getElementById('searchBtn').addEventListener('click',()=>{
-  const query=document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('.tool-card').forEach(card=>{
-    const title=card.querySelector('h3').textContent.toLowerCase();
-    card.style.display=title.includes(query)?'flex':'none';
-  });
+  const newT=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  setTheme(newT); localStorage.setItem('theme',newT);
 });
 </script>
 </body>
