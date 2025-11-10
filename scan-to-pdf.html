@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocScan Pro | Mobile Document Scanner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c7be5;
+            --primary-dark: #1a68d1;
+            --secondary-color: #6e84a3;
+            --success-color: #00d97e;
+            --danger-color: #e63757;
+            --warning-color: #f6c343;
+            --dark-color: #12263f;
+            --light-color: #f9fbfd;
+            --gray-color: #95aac9;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .desktop-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .desktop-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        .desktop-logo i {
+            font-size: 40px;
+        }
+
+        .desktop-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .desktop-subtitle {
+            font-size: 18px;
+            color: var(--secondary-color);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .qr-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            margin-bottom: 40px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .qr-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .qr-code {
+            width: 100%;
+            max-width: 250px;
+            margin: 0 auto 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .qr-instructions {
+            font-size: 16px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .mobile-app-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .app-badge {
+            width: 150px;
+            height: 45px;
+            background-color: var(--dark-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .app-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-badge i {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+        .mobile-view {
+            display: none;
+            background-color: white;
+            min-height: 100vh;
+        }
+
+        .mobile-header {
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .mobile-logo i {
+            font-size: 24px;
+        }
+
+        .mobile-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .mobile-control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mobile-control-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .mobile-control-btn i {
+            font-size: 18px;
+            color: white;
+        }
+
+        .mobile-camera {
+            height: 60vh;
+            background-color: #2c3e50;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .camera-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .camera-placeholder i {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .camera-placeholder h3 {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .camera-placeholder p {
+            opacity: 0.8;
+        }
+
+        .auto-detect-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auto-detect-indicator i {
+            color: var(--success-color);
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .document-outline {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 60%;
+            border: 2px dashed var(--success-color);
+            border-radius: 5px;
+        }
+
+        .mobile-controls-bottom {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border-top: 1px solid #e3ebf6;
+        }
+
+        .mobile-capture-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .mobile-capture-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .mobile-capture-btn i {
+            font-size: 30px;
+            color: var(--primary-color);
+        }
+
+        .mobile-tool {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #f5f7fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mobile-tool:hover {
+            background-color: #e3ebf6;
+        }
+
+        .mobile-tool i {
+            font-size: 20px;
+            color: var(--secondary-color);
+        }
+
+        .document-type-selector {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            overflow-x: auto;
+            background-color: white;
+            border-bottom: 1px solid #e3ebf6;
+        }
+
+        .doc-type {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background-color: #f5f7fb;
+            font-size: 14px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .doc-type.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .upload-section {
+            background-color: white;
+            padding: 20px;
+            border-bottom: 1px solid #e3ebf6;
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d7e0;
+            border-radius: var(--border-radius);
+            padding: 30px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: #f9fbfd;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f5ff;
+        }
+
+        .upload-area i {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-area h3 {
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .upload-area p {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .uploaded-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .uploaded-image {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            aspect-ratio: 3/4;
+        }
+
+        .uploaded-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .uploaded-image:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .image-action {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .image-action:hover {
+            transform: scale(1.1);
+        }
+
+        .image-action i {
+            font-size: 14px;
+            color: var(--dark-color);
+        }
+
+        .image-action.delete:hover i {
+            color: var(--danger-color);
+        }
+
+        .image-action.scan:hover i {
+            color: var(--primary-color);
+        }
+
+        .scanned-documents {
+            padding: 20px;
+            background-color: white;
+        }
+
+        .documents-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .document-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: #f9fbfd;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid #e3ebf6;
+        }
+
+        .document-item:hover {
+            background-color: #e3ebf6;
+        }
+
+        .document-item.active {
+            background-color: #e1f0ff;
+            border: 1px solid var(--primary-color);
+        }
+
+        .document-thumbnail {
+            width: 60px;
+            height: 80px;
+            background-color: var(--gray-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            overflow: hidden;
+        }
+
+        .document-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .document-meta {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+
+        .edit-tools {
+            padding: 20px;
+            background-color: white;
+            border-top: 1px solid #e3ebf6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tool-btn {
+            padding: 10px 15px;
+            border-radius: 30px;
+            background-color: #f5f7fb;
+            border: 1px solid #e3ebf6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .tool-btn:hover {
+            background-color: #e3ebf6;
+        }
+
+        .tool-btn i {
+            color: var(--secondary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Show mobile view only on mobile devices */
+        @media (max-width: 768px) {
+            .desktop-view {
+                display: none;
+            }
+            
+            .mobile-view {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Desktop View with QR Code -->
+    <div class="desktop-view">
+        <div class="desktop-logo">
+            <i class="fas fa-camera"></i>
+            <span>DocScan Pro</span>
+        </div>
+        
+        <h1 class="desktop-title">Scan Documents on Your Mobile Device</h1>
+        <p class="desktop-subtitle">Our premium document scanner is optimized for mobile devices. Scan your documents with high resolution, auto-crop, and advanced editing tools right from your phone.</p>
+        
+        <div class="qr-container">
+            <h2 class="qr-title">Scan to Open on Mobile</h2>
+            <div class="qr-code">
+                <!-- QR Code SVG - In a real app, this would be generated dynamically -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" fill="white"/>
+                    <!-- QR Code pattern would go here -->
+                    <rect x="10" y="10" width="80" height="80" fill="none" stroke="black" stroke-width="1"/>
+                    <rect x="15" y="15" width="20" height="20" fill="black"/>
+                    <rect x="65" y="15" width="20" height="20" fill="black"/>
+                    <rect x="15" y="65" width="20" height="20" fill="black"/>
+                    <rect x="40" y="40" width="5" height="5" fill="black"/>
+                    <rect x="55" y="40" width="5" height="5" fill="black"/>
+                    <rect x="40" y="55" width="5" height="5" fill="black"/>
+                </svg>
+            </div>
+            <p class="qr-instructions">Point your phone's camera at the QR code to open the scanner</p>
+        </div>
+        
+        <div class="mobile-app-badges">
+            <div class="app-badge">
+                <i class="fab fa-apple"></i> App Store
+            </div>
+            <div class="app-badge">
+                <i class="fab fa-google-play"></i> Google Play
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile View with Scanner -->
+    <div class="mobile-view">
+        <div class="mobile-header">
+            <div class="mobile-logo">
+                <i class="fas fa-camera"></i>
+                <span>DocScan Pro</span>
+            </div>
+            <div class="mobile-controls">
+                <div class="mobile-control-btn">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="mobile-control-btn">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-camera">
+            <div class="auto-detect-indicator">
+                <i class="fas fa-bolt"></i> Auto-detect enabled
+            </div>
+            <div class="camera-overlay">
+                <div class="document-outline"></div>
+            </div>
+            <div class="camera-placeholder">
+                <i class="fas fa-camera"></i>
+                <h3>Camera Preview</h3>
+                <p>Position your document within the frame</p>
+            </div>
+        </div>
+
+        <div class="document-type-selector">
+            <div class="doc-type active">Document</div>
+            <div class="doc-type">Receipt</div>
+            <div class="doc-type">Business Card</div>
+            <div class="doc-type">Whiteboard</div>
+            <div class="doc-type">Book</div>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-header">
+                <div class="upload-title">Upload Images</div>
+                <div class="mobile-control-btn">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Upload Images</h3>
+                <p>Tap to select from your gallery</p>
+                <div class="upload-btn">Select Files</div>
+                <input type="file" id="fileInput" class="hidden" accept="image/*" multiple>
+            </div>
+            <div class="uploaded-images" id="uploadedImages">
+                <!-- Uploaded images will appear here -->
+            </div>
+        </div>
+
+        <div class="mobile-controls-bottom">
+            <div class="mobile-tool">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="mobile-capture-btn" id="captureBtn">
+                <i class="fas fa-camera"></i>
+            </div>
+            <div class="mobile-tool">
+                <i class="fas fa-images"></i>
+            </div>
+        </div>
+
+        <div class="scanned-documents">
+            <div class="documents-title">
+                <span>Scanned Documents</span>
+                <span>3/10</span>
+            </div>
+            <div class="document-list">
+                <div class="document-item active">
+                    <div class="document-thumbnail">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-info">
+                        <div class="document-name">Document 1</div>
+                        <div class="document-meta">Today, 10:24 AM • A4</div>
+                    </div>
+                </div>
+                <div class="document-item">
+                    <div class="document-thumbnail">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-info">
+                        <div class="document-name">Receipt</div>
+                        <div class="document-meta">Today, 09:45 AM • Receipt</div>
+                    </div>
+                </div>
+                <div class="document-item">
+                    <div class="document-thumbnail">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-info">
+                        <div class="document-name">Business Card</div>
+                        <div class="document-meta">Yesterday, 04:12 PM • Card</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-tools">
+            <div class="tool-btn">
+                <i class="fas fa-crop-alt"></i> Auto Crop
+            </div>
+            <div class="tool-btn">
+                <i class="fas fa-crop"></i> Manual Crop
+            </div>
+            <div class="tool-btn">
+                <i class="fas fa-redo"></i> Rotate
+            </div>
+            <div class="tool-btn">
+                <i class="fas fa-sync"></i> Retake
+            </div>
+            <div class="tool-btn">
+                <i class="fas fa-edit"></i> Edit Text
+            </div>
+            <div class="tool-btn">
+                <i class="fas fa-magic"></i> Filters
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple interactions for demonstration
+        document.addEventListener('DOMContentLoaded', function() {
+            // Document type selection
+            const docTypes = document.querySelectorAll('.doc-type');
+            docTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    docTypes.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Document item selection
+            const docItems = document.querySelectorAll('.document-item');
+            docItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    docItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Capture button animation
+            const captureBtn = document.getElementById('captureBtn');
+            captureBtn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+                
+                // Simulate capture process
+                const cameraPlaceholder = document.querySelector('.camera-placeholder');
+                const originalHTML = cameraPlaceholder.innerHTML;
+                
+                cameraPlaceholder.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #00d97e;"></i>
+                    <h3>Document Captured!</h3>
+                    <p>Processing your scan...</p>
+                `;
+                
+                setTimeout(() => {
+                    cameraPlaceholder.innerHTML = originalHTML;
+                }, 2000);
+            });
+            
+            // Tool buttons interaction
+            const toolBtns = document.querySelectorAll('.tool-btn');
+            toolBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.style.backgroundColor = '#e1f0ff';
+                    this.style.borderColor = 'var(--primary-color)';
+                    
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                        this.style.borderColor = '';
+                    }, 300);
+                });
+            });
+
+            // Image upload functionality
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const uploadedImages = document.getElementById('uploadedImages');
+
+            // Click on upload area to trigger file input
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Handle file selection
+            fileInput.addEventListener('change', function(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    handleFiles(files);
+                }
+            });
+
+            // Process uploaded files
+            function handleFiles(files) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type.match('image.*')) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            const imageUrl = e.target.result;
+                            addUploadedImage(imageUrl, file.name);
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }
+
+            // Add uploaded image to the gallery
+            function addUploadedImage(imageUrl, fileName) {
+                const imageId = 'img-' + Date.now();
+                
+                const imageElement = document.createElement('div');
+                imageElement.className = 'uploaded-image';
+                imageElement.innerHTML = `
+                    <img src="${imageUrl}" alt="${fileName}">
+                    <div class="image-overlay">
+                        <div class="image-actions">
+                            <div class="image-action scan" data-image="${imageId}">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <div class="image-action delete" data-image="${imageId}">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                uploadedImages.appendChild(imageElement);
+                
+                // Add event listeners for the action buttons
+                const scanBtn = imageElement.querySelector('.image-action.scan');
+                const deleteBtn = imageElement.querySelector('.image-action.delete');
+                
+                scanBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    processImageForScanning(imageUrl, fileName);
+                });
+                
+                deleteBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    imageElement.remove();
+                });
+            }
+
+            // Process image for scanning (simulated)
+            function processImageForScanning(imageUrl, fileName) {
+                // In a real app, this would send the image to the scanning engine
+                
+                // Simulate adding to scanned documents
+                const documentList = document.querySelector('.document-list');
+                const newDocument = document.createElement('div');
+                newDocument.className = 'document-item';
+                newDocument.innerHTML = `
+                    <div class="document-thumbnail">
+                        <img src="${imageUrl}" alt="${fileName}">
+                    </div>
+                    <div class="document-info">
+                        <div class="document-name">${fileName}</div>
+                        <div class="document-meta">Just now • Uploaded</div>
+                    </div>
+                `;
+                
+                documentList.insertBefore(newDocument, documentList.firstChild);
+                
+                // Update active document
+                document.querySelectorAll('.document-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                newDocument.classList.add('active');
+                
+                // Show success message
+                const cameraPlaceholder = document.querySelector('.camera-placeholder');
+                const originalHTML = cameraPlaceholder.innerHTML;
+                
+                cameraPlaceholder.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #00d97e;"></i>
+                    <h3>Image Processed!</h3>
+                    <p>"${fileName}" is ready for editing</p>
+                `;
+                
+                setTimeout(() => {
+                    cameraPlaceholder.innerHTML = originalHTML;
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
