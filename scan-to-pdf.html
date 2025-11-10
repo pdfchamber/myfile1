@@ -1,680 +1,436 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Scan to PDF – PDF Chamber</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/camanjs@4.1.2/dist/caman.full.min.js"></script>
-<!-- OpenCV will call window.onOpenCvReady -->
-<script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
-<style>
-:root {
-  --focus:#00AEEF;
-  --transition:all 0.3s ease;
-  --bg-gradient:linear-gradient(135deg,#E3F2FD 0%,#BBDEFB 50%,#90CAF9 100%);
-  --header-bg:#0a8b65;
-  --card-bg:#ffffff;
-  --text-primary:#002B5B;
-  --text-secondary:#455A64;
-  --btn-green:#0a8b65;
-  --btn-hover:#087555;
-  --border-upload:#0a8b65;
-  --edge-color:#4CAF50;
-  --countdown-bg:rgba(76,175,80,0.9);
-}
-[data-theme="dark"] {
-  --bg-gradient:linear-gradient(135deg,#0D1B2A 0%,#1B263B 50%,#415A77 100%);
-  --header-bg:#0a8b65;
-  --card-bg:#1B263B;
-  --text-primary:#E0E1DD;
-  --text-secondary:#AAB4BE;
-  --btn-green:#0a8b65;
-  --btn-hover:#0b7050;
-  --border-upload:#0a8b65;
-  --edge-color:#66BB6A;
-  --countdown-bg:rgba(102,187,106,0.9);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:'Inter',sans-serif;background:var(--bg-gradient);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column}
-header{background:var(--header-bg);color:#fff;padding:1rem 5%;display:flex;justify-content:space-between;align-items:center}
-.logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.8rem;color:#fff;text-decoration:none}
-.logo svg{width:40px;height:40px;fill:#fff}
-.theme-toggle{width:56px;height:30px;background:rgba(255,255,255,.15);border:2px solid #fff;border-radius:50px;position:relative;cursor:pointer}
-.theme-toggle::before{content:'';position:absolute;top:3px;left:4px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .3s}
-[data-theme="dark"] .theme-toggle::before{transform:translateX(24px);background:#1B263B}
-main{flex:1;max-width:1200px;margin:2rem auto;padding:0 5%;text-align:center}
-.sub-headline{color:var(--header-bg);font-size:1rem;margin-top:-.5rem;margin-bottom:1.5rem;line-height:1.4}
-.upload-area{border:3px dashed var(--border-upload);border-radius:16px;padding:2rem 1rem;background:rgba(255,255,255,0.8);cursor:pointer;margin-bottom:1.5rem;position:relative}
-.upload-area p{color:var(--text-primary);margin-bottom:.5rem;font-size:1.1rem}
-.upload-btn,.camera-btn{background:var(--btn-green);color:#fff;border:none;padding:.75rem 1.5rem;border-radius:50px;font-weight:600;cursor:pointer;transition:var(--transition);margin:0 .25rem}
-.upload-btn:hover,.camera-btn:hover{background:var(--btn-hover);transform:scale(1.05)}
-.camera-btn svg{width:18px;height:18px;vertical-align:middle;margin-right:6px;fill:#fff}
-.preview-container{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:1.5rem;max-height:500px;overflow-y:auto;padding:1rem;border:1px solid var(--border-upload);border-radius:12px;background:var(--card-bg)}
-.preview-item{background:var(--card-bg);border:1px solid var(--border-upload);border-radius:8px;padding:.5rem;box-shadow:0 2px 6px rgba(0,0,0,.1);width:180px;text-align:center;cursor:move;position:relative}
-.preview-item img{width:100%;height:140px;object-fit:contain;background:#f9f9f9;border-radius:4px;margin-bottom:.3rem}
-.preview-item label{font-size:.8rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.preview-item .remove{position:absolute;top:4px;right:4px;background:#f44336;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;opacity:.8}
-.preview-item .remove:hover{opacity:1}
-.counter-box{background:var(--card-bg);padding:1rem;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);max-width:500px;margin:1rem auto;color:var(--text-secondary);font-size:.95rem}
-.btn{background:var(--btn-green);color:#fff;border:none;padding:.8rem 2rem;border-radius:8px;font-weight:600;cursor:pointer;margin:.5rem;transition:var(--transition)}
-.btn:hover{background:var(--btn-hover);transform:scale(1.05)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.toggle-container{display:flex;flex-direction:column;gap:.75rem;align-items:center;margin:1rem auto;max-width:500px}
-.enhance-toggle,.grayscale-toggle,.crop-toggle{display:flex;align-items:center;gap:.5rem;font-size:.9rem}
-.enhance-toggle input,.grayscale-toggle input,.crop-toggle input{accent-color:var(--btn-green)}
-footer{background:var(--header-bg);color:#ECEFF1;text-align:center;padding:1.5rem 5%;font-size:.9rem;margin-top:auto}
-.back-home{display:flex;justify-content:center;margin-top:1.5rem}
-.spinner{margin:2rem 0;font-style:italic;color:#777}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scan to PDF — Mobile Scanner</title>
 
-/* Camera Modal */
-.camera-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;flex-direction:column;padding:1rem}
-.camera-container{position:relative;width:100%;max-width:500px;height:70vh;background:#000;border-radius:12px;overflow:hidden}
-#cameraVideo{width:100%;height:100%;object-fit:cover}
-.edge-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
-.edge-overlay canvas{width:100%;height:100%;opacity:0.7}
-.camera-controls{display:flex;gap:.75rem;margin-top:1rem;justify-content:center;flex-wrap:wrap}
-.camera-controls button{background:var(--btn-green);color:#fff;border:none;padding:.75rem 1.25rem;border-radius:50px;font-weight:600;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:.5rem;font-size:.9rem}
-.camera-controls button:hover{background:var(--btn-hover)}
-.camera-controls button svg{width:18px;height:18px;fill:#fff}
-#closeCamera{background:#f44336}
-#closeCamera:hover{background:#d32f2f}
-#flashToggle{background:#ffa726;color:#fff}
-#flashToggle.active{background:#ff8f00}
-#flashToggle.auto{background:#4caf50}
-#flashToggle.auto.active{background:#388e3c}
-.countdown-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--countdown-bg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .3s}
-.countdown-overlay.show{opacity:1;pointer-events:auto}
-</style>
+  <!-- Libraries -->
+  <!-- OpenCV.js for edge detection / perspective transform -->
+  <script async src="https://docs.opencv.org/4.x/opencv.js" ></script>
+  <!-- pdf-lib to create high-quality PDF client-side -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <!-- Cropper.js for manual fine cropping -->
+  <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+  <style>
+    :root{--accent:#0a8b65;--bg:#f6f9fb;--card:#fff;--text:#102a43}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial; margin:0; min-height:100vh; background:var(--bg); color:var(--text)}
+    header{background:var(--accent); color:white; padding:12px 16px; display:flex;align-items:center;justify-content:space-between}
+    header h1{font-size:18px;margin:0}
+    .container{max-width:1100px;margin:18px auto;padding:16px}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(16,42,67,0.08)}
+
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .controls button,.controls input[type=range],.controls select{padding:8px;border-radius:8px;border:1px solid #dfe7ee;background:white}
+
+    #previewList{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .thumb{width:100px;height:140px;border-radius:6px;overflow:hidden;border:1px solid #e7eef6;display:flex;align-items:center;justify-content:center;position:relative}
+    .thumb img{max-width:100%;max-height:100%;display:block}
+    .thumb .actions{position:absolute;left:6px;top:6px;display:flex;gap:6px}
+    .small{font-size:12px}
+
+    canvas{max-width:100%;border-radius:6px}
+    #captureArea{display:flex;flex-direction:column;gap:8px}
+    #cameraView{width:100%;height:auto;border-radius:8px;background:#000;object-fit:cover}
+
+    .sliderRow{display:flex;gap:8px;align-items:center}
+
+    footer{padding:12px;text-align:center;color:#6b7c93}
+
+    @media (max-width:900px){.grid{grid-template-columns:1fr}.card{padding:10px}}
+  </style>
 </head>
 <body>
-<header>
-  <a class="logo" href="index.html">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
-    PDF Chamber
-  </a>
-  <div id="themeToggle" class="theme-toggle" role="button" aria-label="Toggle theme"></div>
-</header>
+  <header>
+    <h1>Scan to PDF — Mobile Scanner</h1>
+    <div style="font-size:13px;opacity:.95">Capture • Auto-crop • Filters • Export PDF</div>
+  </header>
 
-<main>
-  <h1>Scan to PDF</h1>
-  <div class="sub-headline">
-    <p>Your ultimate online PDF tools hub.</p>
-    <p>Auto-capture, edge detection, flash — perfect scans hands-free.</p>
-  </div>
+  <main class="container">
+    <div class="grid">
+      <!-- Left: Capture & Editor -->
+      <section class="card">
+        <div id="captureArea">
+          <video id="cameraView" autoplay playsinline></video>
 
-  <div id="uploadArea" class="upload-area" role="region" aria-label="Upload images area">
-    <p>Drag & drop images here or click to upload</p>
-    <div style="margin-top:.5rem;">
-      <button id="chooseBtn" class="upload-btn" aria-label="Choose images">Choose Images</button>
-      <button id="openCamera" class="camera-btn" aria-label="Open camera">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-3-3 1.41-1.41L10 13.17l4.59-4.58L16 10l-6 6z"/></svg>
-        Take Photo
-      </button>
+          <div class="controls">
+            <button id="startCam">Start Camera</button>
+            <button id="snapBtn">Take Photo</button>
+            <label style="display:inline-flex;align-items:center;gap:6px"><input id="fileInput" type="file" accept="image/*" multiple>Choose Images</label>
+            <button id="autoCropBtn">Auto Crop / Edge Detect</button>
+            <button id="applyCropBtn">Apply Crop (to editor)</button>
+          </div>
+
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <label class="small">Rotate</label>
+            <button id="rotLeft">⟲</button>
+            <button id="rotRight">⟳</button>
+            <label class="small">Resize (px)</label>
+            <input id="resizeW" type="number" placeholder="width" style="width:90px"> 
+            <input id="resizeH" type="number" placeholder="height" style="width:90px">
+            <button id="applyResize">Apply</button>
+          </div>
+
+          <div style="margin-top:10px">
+            <label class="small">Filters</label>
+            <div class="controls" style="margin-top:6px">
+              <select id="filterSelect">
+                <option value="original">Original Color</option>
+                <option value="auto">Auto Color (contrast boost)</option>
+                <option value="lighttext">Light Text</option>
+                <option value="grayscale">Grayscale</option>
+                <option value="binarize">Binarize (threshold)</option>
+                <option value="invert">Invert</option>
+              </select>
+              <label class="small">Brightness</label>
+              <input id="brightness" type="range" min="-100" max="100" value="0">
+              <label class="small">Contrast</label>
+              <input id="contrast" type="range" min="-100" max="100" value="0">
+              <button id="applyFilter">Apply</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <canvas id="editorCanvas"></canvas>
+          </div>
+
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button id="addToDoc">Add to Document</button>
+            <button id="downloadAllPDF">Export All as PDF</button>
+            <button id="clearAll">Clear</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Right: Thumbnails & settings -->
+      <aside class="card">
+        <div>
+          <h3 style="margin:0 0 8px 0">Pages</h3>
+          <div id="previewList"></div>
+        </div>
+
+        <hr style="margin:12px 0">
+        <div>
+          <h4 style="margin:0 0 8px 0">Quality & PDF Options</h4>
+          <div class="small">Image format</div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <label><input type="radio" name="imgFmt" value="jpeg" checked> JPEG</label>
+            <label><input type="radio" name="imgFmt" value="png"> PNG</label>
+          </div>
+
+          <div style="margin-top:8px" class="small">JPEG Quality (0.1 - 1.0)</div>
+          <input id="jpegQuality" type="range" min="0.1" max="1" step="0.05" value="0.9">
+
+          <div style="margin-top:12px" class="small">PDF Page Size</div>
+          <select id="pdfSize">
+            <option value="auto">Auto (image size)</option>
+            <option value="A4">A4</option>
+            <option value="Letter">Letter</option>
+          </select>
+
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="moveUp" class="small">Move Up</button>
+            <button id="moveDown" class="small">Move Down</button>
+            <button id="delPage" class="small">Delete</button>
+          </div>
+        </div>
+      </aside>
     </div>
-    <input id="fileInput" type="file" accept="image/*" multiple hidden />
-  </div>
 
-  <div id="counterBox" class="counter-box">No images uploaded</div>
+  </main>
 
-  <div id="toggleContainer" class="toggle-container" hidden>
-    <div class="crop-toggle">
-      <input id="autoCrop" type="checkbox" checked />
-      <label for="autoCrop">Auto-Crop Document</label>
-    </div>
-    <div class="enhance-toggle">
-      <input id="autoEnhance" type="checkbox" checked />
-      <label for="autoEnhance">Auto-Enhance</label>
-    </div>
-    <div class="grayscale-toggle">
-      <input id="grayscale" type="checkbox" />
-      <label for="grayscale">Grayscale Scan Mode</label>
-    </div>
-  </div>
-
-  <div id="previewContainer" class="preview-container" aria-live="polite" aria-label="Image previews"></div>
-
-  <div style="text-align:center;margin-top:1rem;">
-    <button id="createBtn" class="btn" disabled>Create PDF</button>
-    <button id="downloadBtn" class="btn" disabled>Download PDF</button>
-  </div>
-
-  <div class="back-home">
-    <a href="index.html"><button class="btn">Back to Home</button></a>
-  </div>
-</main>
-
-<!-- Camera Modal -->
-<div id="cameraModal" class="camera-modal" role="dialog" aria-modal="true" aria-label="Camera dialog">
-  <div class="camera-container">
-    <video id="cameraVideo" autoplay playsinline muted aria-label="Camera preview"></video>
-    <div class="edge-overlay"><canvas id="edgeCanvas"></canvas></div>
-    <div id="countdownOverlay" class="countdown-overlay" aria-hidden="true">3</div>
-  </div>
-  <div class="camera-controls">
-    <button id="flashToggle" aria-pressed="false" aria-label="Toggle flash">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-      Flash OFF
-    </button>
-    <button id="capturePhoto" aria-label="Capture photo">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm6-11H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H6V6h12v12z"/></svg>
-      Capture
-    </button>
-    <button id="closeCamera" aria-label="Close camera">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-      Close
-    </button>
-  </div>
-</div>
-
-<footer>© 2025 PDF Chamber. All rights reserved.</footer>
+  <footer>Made with ❤️ — client-side only. Images never leave your device.</footer>
 
 <script>
-/*
-  Fully wired script inside DOMContentLoaded.
-  OpenCV will call window.onOpenCvReady() when ready.
-*/
-document.addEventListener('DOMContentLoaded', () => {
+// Helpers & state
+let stream=null; const video=document.getElementById('cameraView');
+const editorCanvas=document.getElementById('editorCanvas'); const eCtx=editorCanvas.getContext('2d');
+let currentImage=null; // HTMLImageElement for editor
+let cropper=null; // Cropper.js instance
+let pages=[]; // {blob, dataUrl, width, height}
+let opencvReady=false;
 
-  // ---- Globals ----
-  let uploadedImages = [];
-  let processedImages = [];
-  let pdfBlobUrl = null;
+// Wait for OpenCV to be ready
+function onOpenCvReady(){
+  opencvReady=true; console.log('OpenCV ready');
+}
+if(window.cv && cv['onRuntimeInitialized']){ cv['onRuntimeInitialized']=onOpenCvReady } 
 
-  const A4_WIDTH = 595.28, A4_HEIGHT = 841.89, MARGIN = 40;
+// Camera
+document.getElementById('startCam').addEventListener('click', async ()=>{
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false});
+    video.srcObject=stream; video.play();
+  }catch(e){alert('Camera not available: '+e.message)}
+});
 
-  // DOM
-  const uploadArea = document.getElementById('uploadArea');
-  const fileInput = document.getElementById('fileInput');
-  const chooseBtn = document.getElementById('chooseBtn');
-  const previewContainer = document.getElementById('previewContainer');
-  const counterBox = document.getElementById('counterBox');
-  const createBtn = document.getElementById('createBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const openCamera = document.getElementById('openCamera');
-  const cameraModal = document.getElementById('cameraModal');
-  const cameraVideo = document.getElementById('cameraVideo');
-  const edgeCanvas = document.getElementById('edgeCanvas');
-  const countdownOverlay = document.getElementById('countdownOverlay');
-  const capturePhoto = document.getElementById('capturePhoto');
-  const closeCamera = document.getElementById('closeCamera');
-  const flashToggle = document.getElementById('flashToggle');
-  const toggleContainer = document.getElementById('toggleContainer');
-  const autoCrop = document.getElementById('autoCrop');
-  const autoEnhance = document.getElementById('autoEnhance');
-  const grayscale = document.getElementById('grayscale');
-  const themeToggle = document.getElementById('themeToggle');
+// Snap photo
+document.getElementById('snapBtn').addEventListener('click',()=>{
+  if(!video.srcObject) return alert('Start the camera first');
+  editorCanvas.width=video.videoWidth; editorCanvas.height=video.videoHeight;
+  eCtx.drawImage(video,0,0,editorCanvas.width,editorCanvas.height);
+  loadEditorFromCanvas();
+});
 
-  // state
-  let stream = null, track = null, cvReady = false;
-  let flashMode = 'off', autoFlashInterval = null;
-  let isProcessingFrame = false, stableFrames = 0;
-  let autoCaptureTimer = null, countdownInterval = null, edgeRafId = null, lastFrameTime = 0;
+// File input
+const fileInput=document.getElementById('fileInput');
+fileInput.addEventListener('change',async(e)=>{
+  const files=Array.from(e.target.files);
+  for(const f of files){
+    const url=URL.createObjectURL(f);
+    await loadImageToEditor(url);
+  }
+});
 
-  // OpenCV Mats
-  let srcMat=null, grayMat=null, blurredMat=null, edgesMat=null, contours=null, hierarchy=null;
-  const PROCESS_WIDTH = 320, PROCESS_HEIGHT = 240;
-  let processCanvas = document.createElement('canvas'), processCtx;
-  processCanvas.width = PROCESS_WIDTH; processCanvas.height = PROCESS_HEIGHT;
-  processCtx = processCanvas.getContext('2d');
+// Utility: load image URL into editor canvas and init cropper
+async function loadImageToEditor(url){
+  return new Promise((res)=>{
+    const img=new Image(); img.onload=()=>{
+      editorCanvas.width=img.naturalWidth; editorCanvas.height=img.naturalHeight;
+      eCtx.drawImage(img,0,0); currentImage=img; initCropper(); res();
+    }; img.crossOrigin='anonymous'; img.src=url;
+  });
+}
+function loadEditorFromCanvas(){
+  const url=editorCanvas.toDataURL('image/png'); loadImageToEditor(url);
+}
 
-  const STABLE_THRESHOLD = 6;
-  const MIN_AREA = 8000, MAX_AREA = 50000;
+function initCropper(){
+  // destroy existing cropper
+  if(cropper){ cropper.destroy(); cropper=null; }
+  // attach a temporary img element
+  const tmp=document.createElement('img'); tmp.style.maxWidth='100%'; tmp.src=editorCanvas.toDataURL();
+  // replace canvas with image in DOM for cropper convenience
+  editorCanvas.style.display='none';
+  tmp.id='tmpEditorImg'; tmp.onload=()=>{
+    editorCanvas.parentNode.insertBefore(tmp, editorCanvas);
+    cropper=new Cropper(tmp, {viewMode:1, autoCropArea:1, responsive:true, background:false});
+  }
+}
 
-  // expose onOpenCvReady globally for opencv.js to call
-  window.onOpenCvReady = () => {
-    try {
-      srcMat = new cv.Mat();
-      grayMat = new cv.Mat();
-      blurredMat = new cv.Mat();
-      edgesMat = new cv.Mat();
-      contours = new cv.MatVector();
-      hierarchy = new cv.Mat();
-      cvReady = true;
-      console.log('OpenCV ready');
-    } catch (e) {
-      console.error('OpenCV init failed', e);
+// Apply crop from cropper back to canvas
+document.getElementById('applyCropBtn').addEventListener('click',()=>{
+  if(!cropper) return alert('No image loaded');
+  const c= cropper.getCroppedCanvas();
+  if(!c) return;
+  editorCanvas.width=c.width; editorCanvas.height=c.height; eCtx.clearRect(0,0,c.width,c.height); eCtx.drawImage(c,0,0);
+  // cleanup
+  document.getElementById('tmpEditorImg')?.remove(); cropper.destroy(); cropper=null; editorCanvas.style.display='block';
+  currentImage=null; // editor now driven by canvas
+});
+
+// Auto crop / edge detect using OpenCV
+document.getElementById('autoCropBtn').addEventListener('click', async ()=>{
+  if(!opencvReady) return alert('OpenCV not loaded yet');
+  // grab image from canvas or video
+  let srcCanvas=document.createElement('canvas');
+  if(document.getElementById('tmpEditorImg')){
+    const img=document.getElementById('tmpEditorImg'); srcCanvas.width=img.naturalWidth; srcCanvas.height=img.naturalHeight; srcCanvas.getContext('2d').drawImage(img,0,0);
+  }else{
+    if(editorCanvas.width===0) return alert('No image to process'); srcCanvas.width=editorCanvas.width; srcCanvas.height=editorCanvas.height; srcCanvas.getContext('2d').drawImage(editorCanvas,0,0);
+  }
+  const src = cv.imread(srcCanvas);
+  const orig = src.clone();
+  try{
+    // convert to gray and blur
+    let gray = new cv.Mat(); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+    cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
+    // Canny
+    let edged = new cv.Mat(); cv.Canny(gray, edged, 75, 200);
+
+    // find contours
+    let contours = new cv.MatVector(); let hierarchy = new cv.Mat();
+    cv.findContours(edged, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+
+    // find largest 4-point contour
+    let maxArea=0; let best=null;
+    for(let i=0;i<contours.size();i++){
+      let cnt=contours.get(i);
+      let peri=cv.arcLength(cnt, true);
+      let approx=new cv.Mat(); cv.approxPolyDP(cnt, approx, 0.02*peri, true);
+      if(approx.rows===4){
+        const area=cv.contourArea(cnt);
+        if(area>maxArea){ maxArea=area; best=approx; }
+      }
     }
-  };
+    if(!best){ alert('Document edges not found — try manual crop'); return; }
+    // reorder points
+    const points=[]; for(let i=0;i<4;i++){ points.push({x:best.data32S[i*2], y:best.data32S[i*2+1]}); }
+    // sort to tl,tr,br,bl
+    points.sort((a,b)=>a.y-b.y); const top=points.slice(0,2).sort((a,b)=>a.x-b.x); const bottom=points.slice(2,4).sort((a,b)=>a.x-b.x);
+    const ordered=[top[0], top[1], bottom[1], bottom[0]];
+    // compute width/height
+    function dist(a,b){const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy);} 
+    const widthTop=dist(ordered[0],ordered[1]); const widthBottom=dist(ordered[3],ordered[2]); const maxW=Math.max(widthTop,widthBottom);
+    const heightLeft=dist(ordered[0],ordered[3]); const heightRight=dist(ordered[1],ordered[2]); const maxH=Math.max(heightLeft,heightRight);
 
-  // ---- Utilities ----
-  function distance(p1,p2){ return Math.hypot(p1.x-p2.x,p1.y-p2.y); }
+    // destination
+    const dstCoords = cv.matFromArray(4,1,cv.CV_32FC2,[0,0, maxW-1,0, maxW-1,maxH-1, 0,maxH-1]);
+    const srcCoords = cv.matFromArray(4,1,cv.CV_32FC2,[ordered[0].x,ordered[0].y, ordered[1].x,ordered[1].y, ordered[2].x,ordered[2].y, ordered[3].x,ordered[3].y]);
+    let M = cv.getPerspectiveTransform(srcCoords, dstCoords);
+    let dst = new cv.Mat(); let dsize = new cv.Size(maxW, maxH);
+    cv.warpPerspective(orig, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
 
-  function drawEdges(approx) {
-    const ctx = edgeCanvas.getContext('2d');
-    ctx.clearRect(0,0,edgeCanvas.width,edgeCanvas.height);
-    if (!approx) return {isGood:false};
-    const scaleX = edgeCanvas.width / PROCESS_WIDTH;
-    const scaleY = edgeCanvas.height / PROCESS_HEIGHT;
-    const pts = [];
-    for (let i=0;i<approx.data32S.length;i+=2) pts.push({x: approx.data32S[i]*scaleX, y: approx.data32S[i+1]*scaleY});
-    ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
-    ctx.closePath();
-    const area = Math.abs(cv.contourArea(approx));
-    const isGood = area > MIN_AREA && area < MAX_AREA;
-    const cssColor = getComputedStyle(document.documentElement).getPropertyValue('--edge-color') || '#4CAF50';
-    ctx.strokeStyle = cssColor.trim();
-    ctx.lineWidth = isGood ? 5 : 2;
-    ctx.setLineDash(isGood ? [] : [8,8]);
-    ctx.stroke();
-    return {area, isGood};
+    // show result in canvas
+    cv.imshow(editorCanvas, dst);
+    // cleanup
+    src.delete(); gray.delete(); edged.delete(); contours.delete(); hierarchy.delete(); best.delete(); orig.delete(); dst.delete(); srcCoords.delete(); dstCoords.delete(); M.delete();
+    loadEditorFromCanvas();
+  }catch(err){ console.error(err); alert('Auto-crop failed: '+err.message); }
+});
+
+// Filters and adjustments
+function applyFilterToCanvas(){
+  const data=eCtx.getImageData(0,0,editorCanvas.width, editorCanvas.height);
+  const d=data.data; const brightness=parseInt(document.getElementById('brightness').value); const contrast=parseInt(document.getElementById('contrast').value);
+  const filter=document.getElementById('filterSelect').value;
+  // precompute contrast factor
+  const cFactor=(259*(contrast+255))/(255*(259-contrast));
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i], g=d[i+1], b=d[i+2];
+    // filters
+    if(filter==='grayscale'){ const v=0.299*r+0.587*g+0.114*b; r=g=b=v; }
+    else if(filter==='invert'){ r=255-r; g=255-g; b=255-b; }
+    else if(filter==='binarize'){ const v=0.299*r+0.587*g+0.114*b; const t= (128+contrast/2); const val = v>t?255:0; r=g=b=val; }
+    else if(filter==='lighttext'){ // enhance text: increase contrast + sharpen
+      // convert to gray
+      let v=0.299*r+0.587*g+0.114*b; r=g=b=v; 
+      // boost
+      r = Math.min(255, r*1.25 + 10);
+    }
+    else if(filter==='auto'){
+      // mild auto color: boost contrast and saturation (simple approach)
+      // convert to hsl-like manipulation -> simple contrast
+      r = cFactor*(r-128)+128; g = cFactor*(g-128)+128; b = cFactor*(b-128)+128;
+    }
+    // brightness & contrast
+    r = cFactor*(r-128)+128 + brightness; g = cFactor*(g-128)+128 + brightness; b = cFactor*(b-128)+128 + brightness;
+    d[i]=Math.max(0,Math.min(255,Math.round(r)));
+    d[i+1]=Math.max(0,Math.min(255,Math.round(g)));
+    d[i+2]=Math.max(0,Math.min(255,Math.round(b)));
   }
+  eCtx.putImageData(data,0,0);
+}
 
-  // ---- Edge detection ----
-  function detectEdges() {
-    if (!cvReady || !cameraVideo.videoWidth || isProcessingFrame) return;
-    isProcessingFrame = true;
-    try {
-      processCtx.drawImage(cameraVideo, 0, 0, PROCESS_WIDTH, PROCESS_HEIGHT);
-      cv.imread(processCanvas, srcMat);
-      cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
-      cv.GaussianBlur(grayMat, blurredMat, new cv.Size(5,5), 0);
-      cv.Canny(blurredMat, edgesMat, 75, 150);
-      cv.findContours(edgesMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+document.getElementById('applyFilter').addEventListener('click',()=>{
+  if(editorCanvas.width===0) return alert('No image'); applyFilterToCanvas(); loadEditorFromCanvas();
+});
 
-      let bestApprox = null, largestArea = 0;
-      for (let i=0;i<contours.size();++i){
-        const cnt = contours.get(i);
-        try {
-          const area = cv.contourArea(cnt);
-          if (area > largestArea && area > 3000) {
-            const peri = cv.arcLength(cnt, true);
-            const approx = new cv.Mat();
-            cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
-            if (approx.rows === 4) {
-              largestArea = area;
-              if (bestApprox) bestApprox.delete();
-              bestApprox = approx;
-            } else {
-              approx.delete();
-            }
-          }
-        } finally {
-          cnt.delete();
-        }
-      }
+// Rotate
+document.getElementById('rotLeft').addEventListener('click',()=>rotateEditor(-90));
+document.getElementById('rotRight').addEventListener('click',()=>rotateEditor(90));
+function rotateEditor(deg){
+  if(editorCanvas.width===0) return; const off=document.createElement('canvas'); const oCtx=off.getContext('2d');
+  if(deg%180!==0){ off.width=editorCanvas.height; off.height=editorCanvas.width; oCtx.translate(off.width/2, off.height/2); oCtx.rotate(deg*Math.PI/180); oCtx.drawImage(editorCanvas, -editorCanvas.width/2, -editorCanvas.height/2); }
+  else { off.width=editorCanvas.width; off.height=editorCanvas.height; oCtx.translate(off.width/2, off.height/2); oCtx.rotate(deg*Math.PI/180); oCtx.drawImage(editorCanvas, -editorCanvas.width/2, -editorCanvas.height/2); }
+  editorCanvas.width=off.width; editorCanvas.height=off.height; eCtx.clearRect(0,0,off.width,off.height); eCtx.drawImage(off,0,0);
+  loadEditorFromCanvas();
+}
 
-      const result = bestApprox ? drawEdges(bestApprox) : drawEdges(null);
-      if (bestApprox) bestApprox.delete();
+// Resize
+document.getElementById('applyResize').addEventListener('click',()=>{
+  const w=parseInt(document.getElementById('resizeW').value); const h=parseInt(document.getElementById('resizeH').value);
+  if(!w||!h) return alert('Enter width and height'); const off=document.createElement('canvas'); off.width=w; off.height=h; off.getContext('2d').drawImage(editorCanvas,0,0,w,h);
+  editorCanvas.width=w; editorCanvas.height=h; eCtx.drawImage(off,0,0); loadEditorFromCanvas();
+});
 
-      if (result && result.isGood) {
-        stableFrames++;
-        if (stableFrames >= STABLE_THRESHOLD && !autoCaptureTimer) startCountdown();
-      } else {
-        stableFrames = 0;
-        cancelCountdown();
-      }
+// Add to document (store the current editor canvas as a page)
+document.getElementById('addToDoc').addEventListener('click', async ()=>{
+  if(editorCanvas.width===0) return alert('No image to add');
+  const fmt = document.querySelector('input[name="imgFmt"]:checked').value;
+  const q = parseFloat(document.getElementById('jpegQuality').value);
+  const blob = await new Promise(res=>editorCanvas.toBlob(res, fmt==='jpeg'?'image/jpeg':'image/png', q));
+  const url = URL.createObjectURL(blob);
+  pages.push({blob, url, width:editorCanvas.width, height:editorCanvas.height});
+  renderThumbnails();
+});
 
-    } catch (err) {
-      console.error('detectEdges error', err);
-    } finally {
-      isProcessingFrame = false;
+function renderThumbnails(){
+  const list=document.getElementById('previewList'); list.innerHTML='';
+  pages.forEach((p,i)=>{
+    const div=document.createElement('div'); div.className='thumb'; div.dataset.index=i;
+    const img=document.createElement('img'); img.src=p.url; img.alt='page '+(i+1);
+    const actions=document.createElement('div'); actions.className='actions';
+    const sel=document.createElement('button'); sel.textContent='Edit'; sel.title='Edit this page'; sel.addEventListener('click',()=>editPage(i));
+    const use=document.createElement('button'); use.textContent='Use'; use.title='Replace editor with this page'; use.addEventListener('click',()=>usePage(i));
+    actions.appendChild(sel); actions.appendChild(use);
+    const del=document.createElement('button'); del.textContent='✕'; del.style.position='absolute'; del.style.right='4px'; del.style.top='4px'; del.addEventListener('click',()=>{ pages.splice(i,1); renderThumbnails(); });
+    div.appendChild(actions); div.appendChild(img); div.appendChild(del); list.appendChild(div);
+  });
+}
+
+function editPage(i){
+  const p=pages[i]; loadImageToEditor(p.url);
+}
+function usePage(i){ const p=pages[i]; // load into editor canvas for adjustments
+  loadImageToEditor(p.url);
+}
+
+// Delete, move up/down
+document.getElementById('moveUp').addEventListener('click',()=>{ const idx=getSelectedIndex(); if(idx>0){ const temp=pages[idx-1]; pages[idx-1]=pages[idx]; pages[idx]=temp; renderThumbnails(); } });
+document.getElementById('moveDown').addEventListener('click',()=>{ const idx=getSelectedIndex(); if(idx<pages.length-1){ const temp=pages[idx+1]; pages[idx+1]=pages[idx]; pages[idx]=temp; renderThumbnails(); } });
+document.getElementById('delPage').addEventListener('click',()=>{ const idx=getSelectedIndex(); if(idx>-1){ pages.splice(idx,1); renderThumbnails(); } });
+
+function getSelectedIndex(){ // simple: last clicked thumb
+  const sel = document.querySelector('.thumb.selected'); if(!sel) return pages.length-1; return parseInt(sel.dataset.index);
+}
+
+// click behavior to select thumbs
+document.getElementById('previewList').addEventListener('click',(e)=>{
+  const thumb=e.target.closest('.thumb'); if(!thumb) return; document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('selected')); thumb.classList.add('selected');
+});
+
+// Export to PDF
+document.getElementById('downloadAllPDF').addEventListener('click', async ()=>{
+  if(pages.length===0) return alert('Add at least one page');
+  const pdfSize = document.getElementById('pdfSize').value;
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  for(const p of pages){
+    // convert blob to arrayBuffer
+    const arrayBuffer = await p.blob.arrayBuffer();
+    // embed image
+    let img;
+    if(p.blob.type==='image/png'){ img = await pdfDoc.embedPng(arrayBuffer); }
+    else { img = await pdfDoc.embedJpg(arrayBuffer); }
+    // page size
+    let pageWidth = img.width; let pageHeight = img.height;
+    if(pdfSize==='A4'){ // A4 in points (72 DPI) -> 595 x 842
+      pageWidth=595; pageHeight=842;
+      // fit image into page preserving aspect
+      const ratio=Math.min(pageWidth/img.width, pageHeight/img.height);
+      const drawW=img.width*ratio; const drawH=img.height*ratio;
+      const page = pdfDoc.addPage([pageWidth,pageHeight]);
+      page.drawImage(img,{x:(pageWidth-drawW)/2,y:(pageHeight-drawH)/2,width:drawW,height:drawH});
+    } else if(pdfSize==='Letter'){
+      pageWidth=612; pageHeight=792; const ratio=Math.min(pageWidth/img.width, pageHeight/img.height);
+      const drawW=img.width*ratio; const drawH=img.height*ratio; const page=pdfDoc.addPage([pageWidth,pageHeight]); page.drawImage(img,{x:(pageWidth-drawW)/2,y:(pageHeight-drawH)/2,width:drawW,height:drawH});
+    } else {
+      // auto: use image pixel dims in PDF points (assume 72ppi). To get better quality, we can scale to 300 DPI by multiplying points
+      // choose to embed at image pixel size but constrained to max 2000 points to avoid enormous PDFs
+      const maxDim=2000; let scale=1; if(img.width>maxDim || img.height>maxDim){ scale = Math.min(maxDim/img.width, maxDim/img.height);}      
+      const page = pdfDoc.addPage([Math.round(img.width*scale), Math.round(img.height*scale)]);
+      page.drawImage(img,{x:0,y:0,width:Math.round(img.width*scale),height:Math.round(img.height*scale)});
     }
   }
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes],{type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='scanned-'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+});
 
-  function startCountdown(){
-    if (autoCaptureTimer) return;
-    let seconds = 3;
-    countdownOverlay.textContent = seconds;
-    countdownOverlay.classList.add('show');
-    countdownInterval = setInterval(()=>{
-      seconds--;
-      countdownOverlay.textContent = seconds;
-      if (seconds<=0) {
-        clearInterval(countdownInterval);
-        capturePhoto.click();
-      }
-    },1000);
-    autoCaptureTimer = setTimeout(()=>{
-      clearInterval(countdownInterval);
-      countdownOverlay.classList.remove('show');
-      autoCaptureTimer = null;
-    },3500);
-  }
-  function cancelCountdown(){
-    if (autoCaptureTimer){
-      clearTimeout(autoCaptureTimer);
-      clearInterval(countdownInterval);
-      countdownOverlay.classList.remove('show');
-      autoCaptureTimer = null;
-    }
-  }
+// Clear all
+document.getElementById('clearAll').addEventListener('click',()=>{ pages.forEach(p=>URL.revokeObjectURL(p.url)); pages=[]; renderThumbnails(); editorCanvas.width=0; editorCanvas.height=0; document.getElementById('tmpEditorImg')?.remove(); if(cropper){cropper.destroy();cropper=null;} });
 
-  // DPR-aware overlay
-  function startEdgeDetection(){
-    const dpr = window.devicePixelRatio || 1;
-    edgeCanvas.width = Math.round(cameraVideo.clientWidth * dpr);
-    edgeCanvas.height = Math.round(cameraVideo.clientHeight * dpr);
-    edgeCanvas.style.width = `${cameraVideo.clientWidth}px`;
-    edgeCanvas.style.height = `${cameraVideo.clientHeight}px`;
-    const ctx = edgeCanvas.getContext('2d');
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    lastFrameTime = 0; stableFrames = 0;
-    if (!edgeRafId) edgeRafId = requestAnimationFrame(edgeLoop);
-  }
-  function edgeLoop(timestamp){
-    if (cameraModal.style.display !== 'flex') { edgeRafId = null; return; }
-    if (timestamp - lastFrameTime > 500) { detectEdges(); lastFrameTime = timestamp; }
-    edgeRafId = requestAnimationFrame(edgeLoop);
-  }
+// Accessibility / fallback: load sample image when page loads (optional)
+// window.addEventListener('load', ()=>{/* preload or nothing */});
 
-  // ---- Flash helpers ----
-  async function setFlash(on){
-    try {
-      if (!track || !track.getCapabilities) return;
-      const caps = track.getCapabilities();
-      if (!caps.torch) return;
-      await track.applyConstraints({ advanced: [{ torch: on }]});
-    } catch(e){ console.warn('setFlash failed', e); }
-  }
-  function getLuminosity(){
-    processCtx.drawImage(cameraVideo,0,0,80,60);
-    const data = processCtx.getImageData(0,0,80,60).data;
-    let sum=0;
-    for (let i=0;i<data.length;i+=4) sum += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
-    return sum / (data.length/4);
-  }
-  function startAutoFlash(){
-    if (autoFlashInterval) clearInterval(autoFlashInterval);
-    autoFlashInterval = setInterval(()=>{
-      if (flashMode !== 'auto') return;
-      const shouldFlash = getLuminosity() < 60;
-      setFlash(shouldFlash);
-      flashToggle.classList.toggle('active', shouldFlash);
-      flashToggle.setAttribute('aria-pressed', shouldFlash ? 'true' : 'false');
-    }, 500);
-  }
-  function cycleFlashMode(){
-    const modes = ['off','on','auto'];
-    flashMode = modes[(modes.indexOf(flashMode)+1) % modes.length];
-    flashToggle.className = '';
-    flashToggle.classList.toggle('active', false);
-    const isOn = flashMode === 'on' || (flashMode === 'auto' && getLuminosity() < 60);
-    flashToggle.classList.toggle('active', isOn);
-    if (flashMode === 'auto') flashToggle.classList.add('auto');
-    flashToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg> Flash ${flashMode.toUpperCase()}`;
-    flashToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-    if (flashMode === 'on') setFlash(true);
-    else if (flashMode === 'off') setFlash(false);
-    else startAutoFlash();
-  }
-
-  // ---- Camera open/close/capture ----
-  openCamera.addEventListener('click', async () => {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video:{ facingMode:'environment', width:{ ideal:1280 }, height:{ ideal:720 } },
-        audio:false
-      });
-      track = stream.getVideoTracks()[0];
-      cameraVideo.srcObject = stream;
-      cameraModal.style.display = 'flex';
-      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-      if (caps.torch) {
-        flashToggle.style.display = 'flex';
-        flashToggle.onclick = cycleFlashMode;
-        flashMode = 'off';
-        cycleFlashMode();
-      } else {
-        flashToggle.style.display = 'none';
-      }
-      cameraVideo.onloadedmetadata = () => startEdgeDetection();
-    } catch (err) {
-      alert('Camera access denied or unavailable. Check permissions and HTTPS.');
-      console.error(err);
-    }
-  });
-
-  closeCamera.addEventListener('click', () => {
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    if (autoFlashInterval) clearInterval(autoFlashInterval);
-    cancelCountdown();
-    cameraModal.style.display = 'none';
-    cameraVideo.srcObject = null;
-    stream = track = null;
-    if (edgeRafId) { cancelAnimationFrame(edgeRafId); edgeRafId = null; }
-  });
-
-  capturePhoto.addEventListener('click', async () => {
-    cancelCountdown();
-    const canvas = document.createElement('canvas');
-    canvas.width = cameraVideo.videoWidth; canvas.height = cameraVideo.videoHeight;
-    canvas.getContext('2d').drawImage(cameraVideo, 0, 0);
-    canvas.toBlob(async (blob) => {
-      const file = new File([blob], `photo-${Date.now()}.jpg`, { type:'image/jpeg' });
-      uploadedImages.push(file);
-      createBtn.disabled = true; downloadBtn.disabled = true;
-      processedImages.push(await processImage(file));
-      renderPreviews(); updateCounter(); toggleControls();
-      createBtn.disabled = false;
-    }, 'image/jpeg', 0.9);
-    closeCamera.click();
-  });
-
-  // ---- Processing pipeline ----
-  async function processImage(file) {
-    let working = file;
-    if (autoCrop.checked && cvReady) working = await autoCropImage(working);
-    return new Promise(resolve => {
-      const url = URL.createObjectURL(working);
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
-        Caman(canvas, img, function(){
-          if (grayscale.checked) { this.greyscale(); this.contrast(25); this.sharpen(10); }
-          else if (autoEnhance.checked) { this.brightness(8); this.contrast(12); this.sharpen(8); this.vibrance(15); }
-          this.render(() => {
-            canvas.toBlob(blob => {
-              resolve(new File([blob], file.name, { type: blob.type }));
-              URL.revokeObjectURL(url);
-            }, working.type && working.type.includes('png') ? 'image/png' : 'image/jpeg', 0.95);
-          });
-        });
-      };
-      img.onerror = (e) => { console.error('processImage load error', e); URL.revokeObjectURL(url); resolve(file); };
-      img.src = url;
-    });
-  }
-
-  async function autoCropImage(file) {
-    if (!cvReady || !autoCrop.checked) return file;
-    return new Promise((resolve) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img,0,0);
-        const src = cv.imread(canvas);
-        const gray = new cv.Mat();
-        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-        cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
-        cv.Canny(gray, gray, 50, 150);
-        const contoursLocal = new cv.MatVector();
-        const hierarchyLocal = new cv.Mat();
-        cv.findContours(gray, contoursLocal, hierarchyLocal, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-        let bestRect = null, largest = 0;
-        for (let i=0;i<contoursLocal.size();++i) {
-          const cnt = contoursLocal.get(i);
-          try {
-            const area = cv.contourArea(cnt);
-            if (area > largest && area > 5000) {
-              const peri = cv.arcLength(cnt, true);
-              const approx = new cv.Mat();
-              cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
-              if (approx.rows === 4) {
-                largest = area;
-                if (bestRect) bestRect.delete();
-                bestRect = approx;
-              } else {
-                approx.delete();
-              }
-            }
-          } finally { cnt.delete(); }
-        }
-
-        if (bestRect) {
-          const pts = [];
-          for (let j=0;j<4;++j) pts.push({ x: bestRect.data32S[j*2], y: bestRect.data32S[j*2+1] });
-          const ordered = pts.slice().sort((a,b)=>a.x-b.x);
-          const left = ordered.slice(0,2).sort((a,b)=>a.y-b.y);
-          const right = ordered.slice(2).sort((a,b)=>a.y-b.y);
-          const corners = [left[0], right[0], right[1], left[1]];
-          const w1 = distance(corners[0], corners[1]), w2 = distance(corners[3], corners[2]);
-          const h1 = distance(corners[1], corners[2]), h2 = distance(corners[0], corners[3]);
-          const width = Math.max(Math.round(w1), Math.round(w2)), height = Math.max(Math.round(h1), Math.round(h2));
-          const dst = cv.matFromArray(4,1,cv.CV_32FC2, [0,0, width-1,0, width-1,height-1, 0,height-1]);
-          const srcTri = cv.matFromArray(4,1,cv.CV_32FC2, [corners[0].x,corners[0].y, corners[1].x,corners[1].y, corners[2].x,corners[2].y, corners[3].x,corners[3].y]);
-          const M = cv.getPerspectiveTransform(srcTri, dst);
-          const warped = new cv.Mat();
-          cv.warpPerspective(src, warped, M, new cv.Size(width, height));
-          cv.imshow(canvas, warped);
-          warped.delete(); M.delete(); srcTri.delete(); dst.delete();
-          bestRect.delete();
-        }
-
-        canvas.toBlob(blob => {
-          const croppedFile = new File([blob], file.name, { type: file.type });
-          URL.revokeObjectURL(url);
-          resolve(croppedFile);
-        }, file.type && file.type.includes('png') ? 'image/png' : 'image/jpeg', 0.95);
-
-        src.delete(); gray.delete(); contoursLocal.delete(); hierarchyLocal.delete();
-      };
-      img.onerror = (e) => { console.error('autoCrop load error', e); URL.revokeObjectURL(url); resolve(file); };
-      img.src = url;
-    });
-  }
-
-  // ---- Upload & preview ----
-  uploadArea.addEventListener('click', (e) => { if (!e.target.closest('.camera-btn')) fileInput.click(); });
-  chooseBtn.addEventListener('click', () => fileInput.click());
-  ['dragover','dragenter'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.style.borderColor='var(--btn-green)'; }));
-  ['dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.style.borderColor='var(--border-upload)'; }));
-  uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-  fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-  async function handleFiles(files) {
-    const valid = Array.from(files).filter(f => f.type && f.type.startsWith('image/'));
-    if (!valid.length) return alert('Please upload images.');
-    createBtn.disabled = true; downloadBtn.disabled = true;
-    previewContainer.innerHTML = '<div class="spinner">Processing…</div>';
-    for (const f of valid) {
-      uploadedImages.push(f);
-      processedImages.push(await processImage(f));
-    }
-    renderPreviews(); updateCounter(); createBtn.disabled = false; toggleControls();
-  }
-
-  function removeImage(i){
-    if (i<0 || i>=uploadedImages.length) return;
-    uploadedImages.splice(i,1); processedImages.splice(i,1);
-    renderPreviews(); toggleControls(); updateCounter();
-  }
-
-  function renderPreviews(){
-    previewContainer.innerHTML = '';
-    processedImages.forEach((f,i) => {
-      const url = URL.createObjectURL(f);
-      const div = document.createElement('div'); div.className='preview-item'; div.dataset.index = i;
-      const imgEl = document.createElement('img'); imgEl.src = url; imgEl.alt = f.name;
-      imgEl.onload = () => { try { URL.revokeObjectURL(url); } catch(e){} };
-      const label = document.createElement('label'); label.title = f.name; label.textContent = f.name.slice(0,20) + (f.name.length>20 ? '...' : '');
-      const removeBtn = document.createElement('button'); removeBtn.className='remove'; removeBtn.textContent='X';
-      removeBtn.onclick = () => removeImage(i);
-      div.appendChild(imgEl); div.appendChild(label); div.appendChild(removeBtn);
-      previewContainer.appendChild(div);
-    });
-    initSortable();
-  }
-
-  function updateCounter(){ counterBox.textContent = `${uploadedImages.length} Image${uploadedImages.length!==1?'s':''} | Drag to Reorder`; }
-  function toggleControls(){ toggleContainer.hidden = uploadedImages.length === 0; }
-
-  function initSortable(){
-    new Sortable(previewContainer, {
-      animation:150, ghostClass:'sortable-ghost', onEnd: () => {
-        const order = Array.from(previewContainer.querySelectorAll('.preview-item')).map(el => parseInt(el.dataset.index));
-        uploadedImages = order.map(i => uploadedImages[i]);
-        processedImages = order.map(i => processedImages[i]);
-        renderPreviews();
-      }
-    });
-  }
-
-  autoCrop.addEventListener('change', reprocessAll);
-  autoEnhance.addEventListener('change', reprocessAll);
-  grayscale.addEventListener('change', reprocessAll);
-  async function reprocessAll(){
-    if (!uploadedImages.length) return;
-    processedImages = [];
-    previewContainer.innerHTML = '<div class="spinner">Processing…</div>';
-    createBtn.disabled = true; downloadBtn.disabled = true;
-    for (const f of uploadedImages) processedImages.push(await processImage(f));
-    renderPreviews(); createBtn.disabled = false;
-  }
-
-  // ---- PDF create & download ----
-  createBtn.addEventListener('click', async () => {
-    if (!processedImages.length) return;
-    createBtn.disabled = true; createBtn.textContent = 'Creating…';
-    previewContainer.innerHTML = '<div class="spinner">Generating PDF…</div>';
-    try {
-      const pdf = await PDFLib.PDFDocument.create();
-      let page = pdf.addPage([A4_WIDTH, A4_HEIGHT]); let y = A4_HEIGHT - MARGIN;
-      for (const file of processedImages) {
-        const buf = await file.arrayBuffer();
-        const img = file.type && file.type.includes('png') ? await pdf.embedPng(buf) : await pdf.embedJpg(buf);
-        let w = img.width, h = img.height;
-        const maxW = A4_WIDTH - 2*MARGIN, maxH = y - MARGIN;
-        if (w > maxW) { h = (maxW/w)*h; w = maxW; }
-        if (h > maxH) { w = (maxH/h)*w; h = maxH; }
-        if (y - h < MARGIN) { page = pdf.addPage([A4_WIDTH,A4_HEIGHT]); y = A4_HEIGHT - MARGIN; }
-        page.drawImage(img, { x:(A4_WIDTH-w)/2, y:y-h, width:w, height:h });
-        y -= h + 20;
-      }
-      const bytes = await pdf.save();
-      if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
-      pdfBlobUrl = URL.createObjectURL(new Blob([bytes], { type:'application/pdf' }));
-      const mode = [autoCrop.checked&&'cropped', autoEnhance.checked&&'enhanced', grayscale.checked&&'grayscale'].filter(Boolean).join('-')||'original';
-      previewContainer.innerHTML = `<div style="color:green;font-weight:600;">PDF Created! (${mode})</div>`;
-      downloadBtn.disabled = false;
-    } catch(e){ alert('Error creating PDF. See console.'); console.error(e); }
-    createBtn.disabled = false; createBtn.textContent = 'Create PDF';
-  });
-
-  downloadBtn.addEventListener('click', () => {
-    if (!pdfBlobUrl) return;
-    const a = document.createElement('a');
-    a.href = pdfBlobUrl;
-    const mode = [autoCrop.checked&&'cropped', autoEnhance.checked&&'enhanced', grayscale.checked&&'grayscale'].filter(Boolean).join('-')||'original';
-    a.download = `scanned-${mode}-${new Date().toISOString().slice(0,10)}.pdf`;
-    a.click();
-    setTimeout(()=>{ try{ URL.revokeObjectURL(pdfBlobUrl); pdfBlobUrl = null; } catch(e){} }, 1000);
-  });
-
-  // ---- Theme & unload ----
-  const html = document.documentElement;
-  if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches)) html.dataset.theme = 'dark';
-  themeToggle.addEventListener('click', () => { html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark'; localStorage.theme = html.dataset.theme; });
-
-  window.addEventListener('beforeunload', () => {
-    if (pdfBlobUrl) try { URL.revokeObjectURL(pdfBlobUrl); } catch(e){}
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    if (autoFlashInterval) clearInterval(autoFlashInterval);
-  });
-
-  document.addEventListener('visibilitychange', () => { if (document.hidden) cancelCountdown(); });
-
-  // Done initialisation
-}); // end DOMContentLoaded
 </script>
 </body>
 </html>
