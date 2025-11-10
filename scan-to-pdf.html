@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8" />
 <title>Scan to PDF – PDF Chamber</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/camanjs@4.1.2/dist/caman.full.min.js"></script>
-<script async src="https://docs.opencv.org/4.9.0/opencv.js" onload="onOpenCvReady()"></script>
+<!-- OpenCV will call window.onOpenCvReady -->
+<script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
 <style>
 :root {
   --focus:#00AEEF;
@@ -20,8 +22,6 @@
   --text-secondary:#455A64;
   --btn-green:#0a8b65;
   --btn-hover:#087555;
-  --footer-bg:#0a8b65;
-  --footer-text:#ECEFF1;
   --border-upload:#0a8b65;
   --edge-color:#4CAF50;
   --countdown-bg:rgba(76,175,80,0.9);
@@ -34,223 +34,114 @@
   --text-secondary:#AAB4BE;
   --btn-green:#0a8b65;
   --btn-hover:#0b7050;
-  --footer-bg:#0a8b65;
-  --footer-text:#E0E1DD;
   --border-upload:#0a8b65;
   --edge-color:#66BB6A;
   --countdown-bg:rgba(102,187,106,0.9);
 }
-*,*::before,*::after {box-sizing:border-box;margin:0;padding:0;}
-body {
-  font-family:'Inter',sans-serif;
-  background:var(--bg-gradient);
-  color:var(--text-primary);
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-header {
-  background:var(--header-bg);
-  color:#fff;
-  padding:1rem 5%;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.logo {
-  display:flex;
-  align-items:center;
-  gap:.75rem;
-  font-weight:700;
-  font-size:1.8rem;
-  color:#fff;
-  text-decoration:none;
-}
-.logo svg {width:40px;height:40px;fill:#fff;}
-.theme-toggle {
-  width:56px;height:30px;
-  background:rgba(255,255,255,.15);
-  border:2px solid #ffffff;
-  border-radius:50px;
-  position:relative;
-  cursor:pointer;
-}
-.theme-toggle::before {
-  content:'';position:absolute;top:3px;left:4px;
-  width:20px;height:20px;background:#ffffff;
-  border-radius:50%;transition:transform 0.3s;
-}
-[data-theme="dark"] .theme-toggle::before {
-  transform:translateX(24px);background:#1B263B;
-}
-main {
-  flex:1;max-width:1200px;margin:2rem auto;padding:0 5%;text-align:center;
-}
-.sub-headline {
-  color:var(--header-bg);font-size:1rem;margin-top:-0.5rem;margin-bottom:1.5rem;line-height:1.4;
-}
-.sub-headline p {margin:0.2rem 0;}
-.upload-area {
-  border:3px dashed var(--border-upload);
-  border-radius:16px;padding:2rem 1rem;
-  background:rgba(255,255,255,0.8);cursor:pointer;margin-bottom:1.5rem;
-  position:relative;
-}
-.upload-area p {color:var(--text-primary);margin-bottom:.5rem;font-size:1.1rem;}
-.upload-btn, .camera-btn {
-  background:var(--btn-green);color:#fff;border:none;
-  padding:.75rem 1.5rem;border-radius:50px;font-weight:600;
-  cursor:pointer;transition:var(--transition);margin:0 .25rem;
-}
-.upload-btn:hover, .camera-btn:hover {background:var(--btn-hover);transform:scale(1.05);}
-.camera-btn svg {width:18px;height:18px;vertical-align:middle;margin-right:6px;fill:#fff;}
-.preview-container {
-  display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;
-  margin-top:1.5rem;max-height:500px;overflow-y:auto;padding:1rem;
-  border:1px solid var(--border-upload);border-radius:12px;background:var(--card-bg);
-}
-.preview-item {
-  background:var(--card-bg);border:1px solid var(--border-upload);
-  border-radius:8px;padding:.5rem;box-shadow:0 2px 6px rgba(0,0,0,.1);
-  width:180px;text-align:center;cursor:move;position:relative;
-}
-.preview-item img {
-  width:100%;height:140px;object-fit:contain;background:#f9f9f9;
-  border-radius:4px;margin-bottom:.3rem;
-}
-.preview-item label {
-  font-size:.8rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.preview-item .remove {
-  position:absolute;top:4px;right:4px;background:#f44336;color:#fff;
-  border:none;border-radius:50%;width:20px;height:20px;font-size:12px;
-  cursor:pointer;opacity:0.8;
-}
-.preview-item .remove:hover {opacity:1;}
-.counter-box {
-  background:var(--card-bg);padding:1rem;border-radius:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);max-width:500px;margin:1rem auto;
-  color:var(--text-secondary);font-size:0.95rem;
-}
-.btn {
-  background:var(--btn-green);color:#fff;border:none;
-  padding:.8rem 2rem;border-radius:8px;font-weight:600;
-  cursor:pointer;margin:.5rem;transition:var(--transition);
-}
-.btn:hover {background:var(--btn-hover);transform:scale(1.05);}
-.btn:disabled {opacity:.5;cursor:not-allowed;}
-.toggle-container {
-  display:flex;flex-direction:column;gap:.75rem;align-items:center;
-  margin:1rem auto;max-width:500px;
-}
-.enhance-toggle, .grayscale-toggle, .crop-toggle {
-  display:flex;align-items:center;gap:.5rem;font-size:0.9rem;
-}
-.enhance-toggle input, .grayscale-toggle input, .crop-toggle input {
-  accent-color:var(--btn-green);
-}
-footer {
-  background:var(--footer-bg);color:var(--footer-text);
-  text-align:center;padding:1.5rem 5%;font-size:.9rem;margin-top:auto;
-}
-.back-home {display:flex;justify-content:center;margin-top:1.5rem;}
-.spinner {margin:2rem 0;font-style:italic;color:#777;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg-gradient);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--header-bg);color:#fff;padding:1rem 5%;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.8rem;color:#fff;text-decoration:none}
+.logo svg{width:40px;height:40px;fill:#fff}
+.theme-toggle{width:56px;height:30px;background:rgba(255,255,255,.15);border:2px solid #fff;border-radius:50px;position:relative;cursor:pointer}
+.theme-toggle::before{content:'';position:absolute;top:3px;left:4px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .3s}
+[data-theme="dark"] .theme-toggle::before{transform:translateX(24px);background:#1B263B}
+main{flex:1;max-width:1200px;margin:2rem auto;padding:0 5%;text-align:center}
+.sub-headline{color:var(--header-bg);font-size:1rem;margin-top:-.5rem;margin-bottom:1.5rem;line-height:1.4}
+.upload-area{border:3px dashed var(--border-upload);border-radius:16px;padding:2rem 1rem;background:rgba(255,255,255,0.8);cursor:pointer;margin-bottom:1.5rem;position:relative}
+.upload-area p{color:var(--text-primary);margin-bottom:.5rem;font-size:1.1rem}
+.upload-btn,.camera-btn{background:var(--btn-green);color:#fff;border:none;padding:.75rem 1.5rem;border-radius:50px;font-weight:600;cursor:pointer;transition:var(--transition);margin:0 .25rem}
+.upload-btn:hover,.camera-btn:hover{background:var(--btn-hover);transform:scale(1.05)}
+.camera-btn svg{width:18px;height:18px;vertical-align:middle;margin-right:6px;fill:#fff}
+.preview-container{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:1.5rem;max-height:500px;overflow-y:auto;padding:1rem;border:1px solid var(--border-upload);border-radius:12px;background:var(--card-bg)}
+.preview-item{background:var(--card-bg);border:1px solid var(--border-upload);border-radius:8px;padding:.5rem;box-shadow:0 2px 6px rgba(0,0,0,.1);width:180px;text-align:center;cursor:move;position:relative}
+.preview-item img{width:100%;height:140px;object-fit:contain;background:#f9f9f9;border-radius:4px;margin-bottom:.3rem}
+.preview-item label{font-size:.8rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-item .remove{position:absolute;top:4px;right:4px;background:#f44336;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;opacity:.8}
+.preview-item .remove:hover{opacity:1}
+.counter-box{background:var(--card-bg);padding:1rem;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.1);max-width:500px;margin:1rem auto;color:var(--text-secondary);font-size:.95rem}
+.btn{background:var(--btn-green);color:#fff;border:none;padding:.8rem 2rem;border-radius:8px;font-weight:600;cursor:pointer;margin:.5rem;transition:var(--transition)}
+.btn:hover{background:var(--btn-hover);transform:scale(1.05)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.toggle-container{display:flex;flex-direction:column;gap:.75rem;align-items:center;margin:1rem auto;max-width:500px}
+.enhance-toggle,.grayscale-toggle,.crop-toggle{display:flex;align-items:center;gap:.5rem;font-size:.9rem}
+.enhance-toggle input,.grayscale-toggle input,.crop-toggle input{accent-color:var(--btn-green)}
+footer{background:var(--header-bg);color:#ECEFF1;text-align:center;padding:1.5rem 5%;font-size:.9rem;margin-top:auto}
+.back-home{display:flex;justify-content:center;margin-top:1.5rem}
+.spinner{margin:2rem 0;font-style:italic;color:#777}
 
 /* Camera Modal */
-.camera-modal {
-  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;
-  flex-direction:column;padding:1rem;
-}
-.camera-container {
-  position:relative;width:100%;max-width:500px;height:70vh;background:#000;
-  border-radius:12px;overflow:hidden;
-}
-#cameraVideo {width:100%;height:100%;object-fit:cover;}
-.edge-overlay {
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  pointer-events:none;z-index:10;
-}
-.edge-overlay canvas {width:100%;height:100%;opacity:0.7;}
-.camera-controls {
-  display:flex;gap:.75rem;margin-top:1rem;justify-content:center;flex-wrap:wrap;
-}
-.camera-controls button {
-  background:var(--btn-green);color:#fff;border:none;
-  padding:.75rem 1.25rem;border-radius:50px;font-weight:600;
-  cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:.5rem;
-  font-size:0.9rem;
-}
-.camera-controls button:hover {background:var(--btn-hover);}
-.camera-controls button svg {width:18px;height:18px;fill:#fff;}
-#closeCamera {background:#f44336;}
-#closeCamera:hover {background:#d32f2f;}
-#flashToggle {
-  background:#ffa726;color:#fff;
-}
-#flashToggle.active {background:#ff8f00;}
-#flashToggle.auto {background:#4caf50;}
-#flashToggle.auto.active {background:#388e3c;}
-
-/* Auto-Capture */
-.countdown-overlay {
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:var(--countdown-bg);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-size:3rem;font-weight:700;z-index:20;
-  opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
-.countdown-overlay.show {opacity:1;pointer-events:auto;}
+.camera-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;flex-direction:column;padding:1rem}
+.camera-container{position:relative;width:100%;max-width:500px;height:70vh;background:#000;border-radius:12px;overflow:hidden}
+#cameraVideo{width:100%;height:100%;object-fit:cover}
+.edge-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+.edge-overlay canvas{width:100%;height:100%;opacity:0.7}
+.camera-controls{display:flex;gap:.75rem;margin-top:1rem;justify-content:center;flex-wrap:wrap}
+.camera-controls button{background:var(--btn-green);color:#fff;border:none;padding:.75rem 1.25rem;border-radius:50px;font-weight:600;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:.5rem;font-size:.9rem}
+.camera-controls button:hover{background:var(--btn-hover)}
+.camera-controls button svg{width:18px;height:18px;fill:#fff}
+#closeCamera{background:#f44336}
+#closeCamera:hover{background:#d32f2f}
+#flashToggle{background:#ffa726;color:#fff}
+#flashToggle.active{background:#ff8f00}
+#flashToggle.auto{background:#4caf50}
+#flashToggle.auto.active{background:#388e3c}
+.countdown-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--countdown-bg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .3s}
+.countdown-overlay.show{opacity:1;pointer-events:auto}
 </style>
 </head>
 <body>
 <header>
-  <a href="index.html" class="logo">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+  <a class="logo" href="index.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
     PDF Chamber
   </a>
-  <div class="theme-toggle" id="themeToggle"></div>
+  <div id="themeToggle" class="theme-toggle" role="button" aria-label="Toggle theme"></div>
 </header>
+
 <main>
   <h1>Scan to PDF</h1>
   <div class="sub-headline">
     <p>Your ultimate online PDF tools hub.</p>
-    <p>Auto-capture when aligned, edge detection, flash — perfect scans hands-free.</p>
+    <p>Auto-capture, edge detection, flash — perfect scans hands-free.</p>
   </div>
 
-  <div class="upload-area" id="uploadArea">
+  <div id="uploadArea" class="upload-area" role="region" aria-label="Upload images area">
     <p>Drag & drop images here or click to upload</p>
     <div style="margin-top:.5rem;">
-      <button class="upload-btn">Choose Images</button>
-      <button class="camera-btn" id="openCamera">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-3-3 1.41-1.41L10 13.17l4.59-4.58L16 10l-6 6z"/></svg>
+      <button id="chooseBtn" class="upload-btn" aria-label="Choose images">Choose Images</button>
+      <button id="openCamera" class="camera-btn" aria-label="Open camera">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-3-3 1.41-1.41L10 13.17l4.59-4.58L16 10l-6 6z"/></svg>
         Take Photo
       </button>
     </div>
-    <input type="file" id="fileInput" accept="image/*" hidden multiple>
+    <input id="fileInput" type="file" accept="image/*" multiple hidden />
   </div>
 
-  <div class="counter-box" id="counterBox">No images uploaded</div>
+  <div id="counterBox" class="counter-box">No images uploaded</div>
 
-  <div class="toggle-container" id="toggleContainer" hidden>
+  <div id="toggleContainer" class="toggle-container" hidden>
     <div class="crop-toggle">
-      <input type="checkbox" id="autoCrop" checked>
+      <input id="autoCrop" type="checkbox" checked />
       <label for="autoCrop">Auto-Crop Document</label>
     </div>
     <div class="enhance-toggle">
-      <input type="checkbox" id="autoEnhance" checked>
+      <input id="autoEnhance" type="checkbox" checked />
       <label for="autoEnhance">Auto-Enhance</label>
     </div>
     <div class="grayscale-toggle">
-      <input type="checkbox" id="grayscale">
+      <input id="grayscale" type="checkbox" />
       <label for="grayscale">Grayscale Scan Mode</label>
     </div>
   </div>
 
-  <div id="previewContainer" class="preview-container"></div>
+  <div id="previewContainer" class="preview-container" aria-live="polite" aria-label="Image previews"></div>
 
-  <button class="btn" id="createBtn" disabled>Create PDF</button>
-  <button class="btn" id="downloadBtn" disabled>Download PDF</button>
+  <div style="text-align:center;margin-top:1rem;">
+    <button id="createBtn" class="btn" disabled>Create PDF</button>
+    <button id="downloadBtn" class="btn" disabled>Download PDF</button>
+  </div>
 
   <div class="back-home">
     <a href="index.html"><button class="btn">Back to Home</button></a>
@@ -258,25 +149,23 @@ footer {
 </main>
 
 <!-- Camera Modal -->
-<div class="camera-modal" id="cameraModal">
+<div id="cameraModal" class="camera-modal" role="dialog" aria-modal="true" aria-label="Camera dialog">
   <div class="camera-container">
-    <video id="cameraVideo" autoplay playsinline></video>
-    <div class="edge-overlay">
-      <canvas id="edgeCanvas"></canvas>
-    </div>
-    <div class="countdown-overlay" id="countdownOverlay">3</div>
+    <video id="cameraVideo" autoplay playsinline muted aria-label="Camera preview"></video>
+    <div class="edge-overlay"><canvas id="edgeCanvas"></canvas></div>
+    <div id="countdownOverlay" class="countdown-overlay" aria-hidden="true">3</div>
   </div>
   <div class="camera-controls">
-    <button id="flashToggle">
-      <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+    <button id="flashToggle" aria-pressed="false" aria-label="Toggle flash">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
       Flash OFF
     </button>
-    <button id="capturePhoto">
-      <svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm6-11H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H6V6h12v12z"/></svg>
+    <button id="capturePhoto" aria-label="Capture photo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm6-11H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H6V6h12v12z"/></svg>
       Capture
     </button>
-    <button id="closeCamera">
-      <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    <button id="closeCamera" aria-label="Close camera">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
       Close
     </button>
   </div>
@@ -285,462 +174,507 @@ footer {
 <footer>© 2025 PDF Chamber. All rights reserved.</footer>
 
 <script>
-let uploadedImages = [];
-let processedImages = [];
-let pdfBlobUrl = null;
-const A4_WIDTH = 595.28;
-const A4_HEIGHT = 841.89;
-const MARGIN = 40;
+/*
+  Fully wired script inside DOMContentLoaded.
+  OpenCV will call window.onOpenCvReady() when ready.
+*/
+document.addEventListener('DOMContentLoaded', () => {
 
-// DOM
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const previewContainer = document.getElementById('previewContainer');
-const counterBox = document.getElementById('counterBox');
-const createBtn = document.getElementById('createBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const openCamera = document.getElementById('openCamera');
-const cameraModal = document.getElementById('cameraModal');
-const cameraVideo = document.getElementById('cameraVideo');
-const edgeCanvas = document.getElementById('edgeCanvas');
-const countdownOverlay = document.getElementById('countdownOverlay');
-const capturePhoto = document.getElementById('capturePhoto');
-const closeCamera = document.getElementById('closeCamera');
-const flashToggle = document.getElementById('flashToggle');
-const toggleContainer = document.getElementById('toggleContainer');
-const autoCrop = document.getElementById('autoCrop');
-const autoEnhance = document.getElementById('autoEnhance');
-const grayscale = document.getElementById('grayscale');
+  // ---- Globals ----
+  let uploadedImages = [];
+  let processedImages = [];
+  let pdfBlobUrl = null;
 
-// Camera & CV
-let stream = null;
-let cvReady = false;
-let track = null;
-let flashMode = 'off';
-let autoFlashInterval = null;
-let isProcessingFrame = false;
-let stableFrames = 0;
-let autoCaptureTimer = null;
-let countdownInterval = null;
+  const A4_WIDTH = 595.28, A4_HEIGHT = 841.89, MARGIN = 40;
 
-// Reusable OpenCV Mats
-let src = null, gray = null, blurred = null, edges = null;
-let contours = null, hierarchy = null;
+  // DOM
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('fileInput');
+  const chooseBtn = document.getElementById('chooseBtn');
+  const previewContainer = document.getElementById('previewContainer');
+  const counterBox = document.getElementById('counterBox');
+  const createBtn = document.getElementById('createBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const openCamera = document.getElementById('openCamera');
+  const cameraModal = document.getElementById('cameraModal');
+  const cameraVideo = document.getElementById('cameraVideo');
+  const edgeCanvas = document.getElementById('edgeCanvas');
+  const countdownOverlay = document.getElementById('countdownOverlay');
+  const capturePhoto = document.getElementById('capturePhoto');
+  const closeCamera = document.getElementById('closeCamera');
+  const flashToggle = document.getElementById('flashToggle');
+  const toggleContainer = document.getElementById('toggleContainer');
+  const autoCrop = document.getElementById('autoCrop');
+  const autoEnhance = document.getElementById('autoEnhance');
+  const grayscale = document.getElementById('grayscale');
+  const themeToggle = document.getElementById('themeToggle');
 
-// Downscaled processing
-const PROCESS_WIDTH = 320;
-const PROCESS_HEIGHT = 240;
-let processCanvas = null;
-let processCtx = null;
+  // state
+  let stream = null, track = null, cvReady = false;
+  let flashMode = 'off', autoFlashInterval = null;
+  let isProcessingFrame = false, stableFrames = 0;
+  let autoCaptureTimer = null, countdownInterval = null, edgeRafId = null, lastFrameTime = 0;
 
-// Auto-capture thresholds
-const STABLE_THRESHOLD = 6; // ~3 sec at 2 FPS
-const MIN_AREA = 8000;
-const MAX_AREA = 50000;
-
-// OpenCV Ready
-function onOpenCvReady() {
-  cvReady = true;
-  console.log('OpenCV.js ready');
-
-  src = new cv.Mat();
-  gray = new cv.Mat();
-  blurred = new cv.Mat();
-  edges = new cv.Mat();
-  contours = new cv.MatVector();
-  hierarchy = new cv.Mat();
-
-  processCanvas = document.createElement('canvas');
-  processCanvas.width = PROCESS_WIDTH;
-  processCanvas.height = PROCESS_HEIGHT;
+  // OpenCV Mats
+  let srcMat=null, grayMat=null, blurredMat=null, edgesMat=null, contours=null, hierarchy=null;
+  const PROCESS_WIDTH = 320, PROCESS_HEIGHT = 240;
+  let processCanvas = document.createElement('canvas'), processCtx;
+  processCanvas.width = PROCESS_WIDTH; processCanvas.height = PROCESS_HEIGHT;
   processCtx = processCanvas.getContext('2d');
-}
 
-// Draw edges
-function drawEdges(approx) {
-  const ctx = edgeCanvas.getContext('2d');
-  ctx.clearRect(0, 0, edgeCanvas.width, edgeCanvas.height);
-  if (!approx) return;
+  const STABLE_THRESHOLD = 6;
+  const MIN_AREA = 8000, MAX_AREA = 50000;
 
-  const scaleX = edgeCanvas.width / PROCESS_WIDTH;
-  const scaleY = edgeCanvas.height / PROCESS_HEIGHT;
-
-  const points = [];
-  for (let i = 0; i < approx.data32S.length; i += 2) {
-    points.push({ x: approx.data32S[i] * scaleX, y: approx.data32S[i + 1] * scaleY });
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y);
-  }
-  ctx.closePath();
-
-  const area = Math.abs(cv.contourArea(approx));
-  const isGood = area > MIN_AREA && area < MAX_AREA;
-
-  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--edge-color');
-  ctx.lineWidth = isGood ? 5 : 2;
-  ctx.setLineDash(isGood ? [] : [8, 8]);
-  ctx.stroke();
-
-  return { area, isGood };
-}
-
-// Edge detection + auto-capture
-function detectEdges() {
-  if (!cvReady || !cameraVideo.videoWidth || isProcessingFrame) return;
-  isProcessingFrame = true;
-
-  processCtx.drawImage(cameraVideo, 0, 0, PROCESS_WIDTH, PROCESS_HEIGHT);
-  cv.imread(processCanvas, src);
-
-  cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-  cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
-  cv.Canny(blurred, edges, 75, 150);
-
-  cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-  let bestApprox = null;
-  let largestArea = 0;
-
-  for (let i = 0; i < contours.size(); ++i) {
-    const cnt = contours.get(i);
-    const area = cv.contourArea(cnt);
-    if (area > largestArea && area > 3000) {
-      const peri = cv.arcLength(cnt, true);
-      const approx = new cv.Mat();
-      cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
-      if (approx.rows === 4) {
-        largestArea = area;
-        bestApprox = approx;
-      } else {
-        approx.delete();
-      }
+  // expose onOpenCvReady globally for opencv.js to call
+  window.onOpenCvReady = () => {
+    try {
+      srcMat = new cv.Mat();
+      grayMat = new cv.Mat();
+      blurredMat = new cv.Mat();
+      edgesMat = new cv.Mat();
+      contours = new cv.MatVector();
+      hierarchy = new cv.Mat();
+      cvReady = true;
+      console.log('OpenCV ready');
+    } catch (e) {
+      console.error('OpenCV init failed', e);
     }
+  };
+
+  // ---- Utilities ----
+  function distance(p1,p2){ return Math.hypot(p1.x-p2.x,p1.y-p2.y); }
+
+  function drawEdges(approx) {
+    const ctx = edgeCanvas.getContext('2d');
+    ctx.clearRect(0,0,edgeCanvas.width,edgeCanvas.height);
+    if (!approx) return {isGood:false};
+    const scaleX = edgeCanvas.width / PROCESS_WIDTH;
+    const scaleY = edgeCanvas.height / PROCESS_HEIGHT;
+    const pts = [];
+    for (let i=0;i<approx.data32S.length;i+=2) pts.push({x: approx.data32S[i]*scaleX, y: approx.data32S[i+1]*scaleY});
+    ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.closePath();
+    const area = Math.abs(cv.contourArea(approx));
+    const isGood = area > MIN_AREA && area < MAX_AREA;
+    const cssColor = getComputedStyle(document.documentElement).getPropertyValue('--edge-color') || '#4CAF50';
+    ctx.strokeStyle = cssColor.trim();
+    ctx.lineWidth = isGood ? 5 : 2;
+    ctx.setLineDash(isGood ? [] : [8,8]);
+    ctx.stroke();
+    return {area, isGood};
   }
 
-  const result = drawEdges(bestApprox);
-  if (bestApprox) bestApprox.delete();
+  // ---- Edge detection ----
+  function detectEdges() {
+    if (!cvReady || !cameraVideo.videoWidth || isProcessingFrame) return;
+    isProcessingFrame = true;
+    try {
+      processCtx.drawImage(cameraVideo, 0, 0, PROCESS_WIDTH, PROCESS_HEIGHT);
+      cv.imread(processCanvas, srcMat);
+      cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
+      cv.GaussianBlur(grayMat, blurredMat, new cv.Size(5,5), 0);
+      cv.Canny(blurredMat, edgesMat, 75, 150);
+      cv.findContours(edgesMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-  // Auto-capture logic
-  if (result && result.isGood) {
-    stableFrames++;
-    if (stableFrames >= STABLE_THRESHOLD && !autoCaptureTimer) {
-      startCountdown();
-    }
-  } else {
-    stableFrames = 0;
-    cancelCountdown();
-  }
-
-  isProcessingFrame = false;
-}
-
-// Countdown
-function startCountdown() {
-  if (autoCaptureTimer) return;
-  let seconds = 3;
-  countdownOverlay.textContent = seconds;
-  countdownOverlay.classList.add('show');
-
-  countdownInterval = setInterval(() => {
-    seconds--;
-    countdownOverlay.textContent = seconds;
-    if (seconds <= 0) {
-      clearInterval(countdownInterval);
-      capturePhoto.click();
-    }
-  }, 1000);
-
-  autoCaptureTimer = setTimeout(() => {
-    clearInterval(countdownInterval);
-    countdownOverlay.classList.remove('show');
-    autoCaptureTimer = null;
-  }, 3500);
-}
-
-function cancelCountdown() {
-  if (autoCaptureTimer) {
-    clearTimeout(autoCaptureTimer);
-    clearInterval(countdownInterval);
-    countdownOverlay.classList.remove('show');
-    autoCaptureTimer = null;
-  }
-}
-
-// RAF loop
-let lastFrameTime = 0;
-function edgeLoop(timestamp) {
-  if (cameraModal.style.display !== 'flex') return;
-  if (timestamp - lastFrameTime > 500) {
-    detectEdges();
-    lastFrameTime = timestamp;
-  }
-  requestAnimationFrame(edgeLoop);
-}
-
-function startEdgeDetection() {
-  edgeCanvas.width = cameraVideo.clientWidth;
-  edgeCanvas.height = cameraVideo.clientHeight;
-  lastFrameTime = 0;
-  stableFrames = 0;
-  requestAnimationFrame(edgeLoop);
-}
-
-// Flash
-async function setFlash(on) {
-  if (!track?.getCapabilities().torch) return;
-  try { await track.applyConstraints({ advanced: [{ torch: on }] }); } catch (e) {}
-}
-
-function getLuminosity() {
-  processCtx.drawImage(cameraVideo, 0, 0, 80, 60);
-  const data = processCtx.getImageData(0, 0, 80, 60).data;
-  let sum = 0;
-  for (let i = 0; i < data.length; i += 4) sum += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
-  return sum / (data.length / 4);
-}
-
-function startAutoFlash() {
-  if (autoFlashInterval) clearInterval(autoFlashInterval);
-  autoFlashInterval = setInterval(() => {
-    if (flashMode !== 'auto') return;
-    const shouldFlash = getLuminosity() < 60;
-    setFlash(shouldFlash);
-    flashToggle.classList.toggle('active', shouldFlash);
-  }, 500);
-}
-
-function cycleFlashMode() {
-  const modes = ['off', 'on', 'auto'];
-  flashMode = modes[(modes.indexOf(flashMode) + 1) % 3];
-  flashToggle.className = '';
-  const isOn = flashMode === 'on' || (flashMode === 'auto' && getLuminosity() < 60);
-  flashToggle.classList.toggle('active', isOn);
-  if (flashMode === 'auto') flashToggle.classList.add('auto');
-  flashToggle.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg> Flash ${flashMode.toUpperCase()}`;
-  if (flashMode === 'on') setFlash(true);
-  else if (flashMode === 'off') setFlash(false);
-  else startAutoFlash();
-}
-
-// Open Camera
-openCamera.addEventListener('click', async () => {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: false
-    });
-
-    track = stream.getVideoTracks()[0];
-    cameraVideo.srcObject = stream;
-    cameraModal.style.display = 'flex';
-
-    if (track.getCapabilities().torch) {
-      flashToggle.style.display = 'flex';
-      flashToggle.onclick = cycleFlashMode;
-      flashMode = 'off';
-      cycleFlashMode();
-    } else {
-      flashToggle.style.display = 'none';
-    }
-
-    cameraVideo.onloadedmetadata = () => startEdgeDetection();
-
-  } catch (err) {
-    alert('Camera access denied.');
-    console.error(err);
-  }
-});
-
-// Close Camera
-closeCamera.addEventListener('click', () => {
-  if (stream) stream.getTracks().forEach(t => t.stop());
-  if (autoFlashInterval) clearInterval(autoFlashInterval);
-  cancelCountdown();
-  cameraModal.style.display = 'none';
-  cameraVideo.srcObject = null;
-  stream = track = null;
-});
-
-// Capture
-capturePhoto.addEventListener('click', async () => {
-  cancelCountdown();
-  const canvas = document.createElement('canvas');
-  canvas.width = cameraVideo.videoWidth;
-  canvas.height = cameraVideo.videoHeight;
-  canvas.getContext('2d').drawImage(cameraVideo, 0, 0);
-
-  canvas.toBlob(async (blob) => {
-    const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-    uploadedImages.push(file);
-    processedImages.push(await processImage(file));
-    renderPreviews(); updateCounter(); createBtn.disabled = false; toggleControls();
-  }, 'image/jpeg', 0.9);
-
-  closeCamera.click();
-});
-
-// Process Image (unchanged)
-async function processImage(file) {
-  let img = file;
-  if (autoCrop.checked && cvReady) img = await autoCropImage(img);
-  return new Promise(resolve => {
-    const url = URL.createObjectURL(img);
-    const image = new Image();
-    image.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = image.width; canvas.height = image.height;
-      Caman(canvas, image, function () {
-        if (grayscale.checked) { this.greyscale(); this.contrast(25); this.sharpen(10); }
-        else if (autoEnhance.checked) { this.brightness(8); this.contrast(12); this.sharpen(8); this.vibrance(15); }
-        this.render(() => {
-          canvas.toBlob(blob => {
-            resolve(new File([blob], file.name, { type: blob.type }));
-            URL.revokeObjectURL(url);
-          }, img.type.includes('png') ? 'image/png' : 'image/jpeg', 0.95);
-        });
-      });
-    };
-    image.src = url;
-  });
-}
-
-// Auto-crop (unchanged)
-async function autoCropImage(file) {
-  if (!cvReady || !autoCrop.checked) return file;
-  return new Promise(resolve => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
-      const src = cv.imread(canvas);
-      const gray = new cv.Mat(); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-      cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0); cv.Canny(gray, gray, 50, 150);
-      const contours = new cv.MatVector(); const hierarchy = new cv.Mat();
-      cv.findContours(gray, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-      let bestRect = null; let largest = 0;
-      for (let i = 0; i < contours.size(); i++) {
-        const cnt = contours.get(i); const area = cv.contourArea(cnt);
-        if (area > largest && area > 5000) {
-          const peri = cv.arcLength(cnt, true); const approx = new cv.Mat();
-          cv.approxPolyDP(cnt, approx, 0.02*peri, true);
-          if (approx.rows === 4) { largest = area; bestRect = approx; } else approx.delete();
+      let bestApprox = null, largestArea = 0;
+      for (let i=0;i<contours.size();++i){
+        const cnt = contours.get(i);
+        try {
+          const area = cv.contourArea(cnt);
+          if (area > largestArea && area > 3000) {
+            const peri = cv.arcLength(cnt, true);
+            const approx = new cv.Mat();
+            cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
+            if (approx.rows === 4) {
+              largestArea = area;
+              if (bestApprox) bestApprox.delete();
+              bestApprox = approx;
+            } else {
+              approx.delete();
+            }
+          }
+        } finally {
+          cnt.delete();
         }
       }
-      if (bestRect) {
-        const points = []; for (let j=0;j<4;j++) points.push({x:bestRect.data32S[j*2], y:bestRect.data32S[j*2+1]});
-        const ordered = [points[0], points[1], points[3], points[2]].sort((a,b)=>a.x-b.x);
-        const width = Math.max(cv.norm(ordered[0], ordered[1]), cv.norm(ordered[2], ordered[3]));
-        const height = Math.max(cv.norm(ordered[1], ordered[2]), cv.norm(ordered[3], ordered[0]));
-        const dst = cv.matFromArray(4,1,cv.CV_32FC2,[0,0,width-1,0,width-1,height-1,0,height-1].flat());
-        const srcTri = cv.matFromArray(4,1,cv.CV_32FC2,ordered.flatMap(p=>[p.x,p.y]));
-        const M = cv.getPerspectiveTransform(srcTri, dst);
-        const warped = new cv.Mat(); cv.warpPerspective(src, warped, M, new cv.Size(width, height));
-        cv.imshow(canvas, warped); warped.delete(); M.delete(); srcTri.delete(); dst.delete();
+
+      const result = bestApprox ? drawEdges(bestApprox) : drawEdges(null);
+      if (bestApprox) bestApprox.delete();
+
+      if (result && result.isGood) {
+        stableFrames++;
+        if (stableFrames >= STABLE_THRESHOLD && !autoCaptureTimer) startCountdown();
+      } else {
+        stableFrames = 0;
+        cancelCountdown();
       }
-      canvas.toBlob(b=>resolve(new File([b],file.name,{type:b.type})), file.type.includes('png')?'image/png':'image/jpeg',0.95);
-      src.delete(); gray.delete(); contours.delete(); hierarchy.delete();
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  });
-}
 
-// Upload, render, PDF, theme (unchanged)
-uploadArea.addEventListener('click', e => { if (!e.target.closest('.camera-btn')) fileInput.click(); });
-['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.style.borderColor='var(--btn-green)';}));
-['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.style.borderColor='var(--border-upload)';}));
-uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-async function handleFiles(files) {
-  const valid = Array.from(files).filter(f=>f.type.startsWith('image/'));
-  if (!valid.length) return alert('Please upload images.');
-  for (const f of valid) { uploadedImages.push(f); processedImages.push(await processImage(f)); }
-  renderPreviews(); updateCounter(); createBtn.disabled=false; toggleControls();
-}
-
-function removeImage(i) { uploadedImages.splice(i,1); processedImages.splice(i,1); renderPreviews(); toggleControls(); }
-function renderPreviews() {
-  previewContainer.innerHTML = '';
-  processedImages.forEach((f,i) => {
-    const url = URL.createObjectURL(f);
-    const div = document.createElement('div'); div.className='preview-item'; div.dataset.index=i;
-    div.innerHTML = `<img src="${url}"><label title="${f.name}">${f.name.slice(0,20)+(f.name.length>20?'...':'')}</label><button class="remove" onclick="removeImage(${i})">X</button>`;
-    previewContainer.appendChild(div);
-  });
-  initSortable();
-}
-function updateCounter() { counterBox.textContent = `${uploadedImages.length} Image${uploadedImages.length!==1?'s':''} | Drag to Reorder`; }
-function initSortable() {
-  new Sortable(previewContainer, { animation:150, ghostClass:'sortable-ghost', onEnd:()=>{
-    const order = Array.from(previewContainer.querySelectorAll('.preview-item')).map(el=>parseInt(el.dataset.index));
-    uploadedImages = order.map(i=>uploadedImages[i]); processedImages = order.map(i=>processedImages[i]); renderPreviews();
-  }});
-}
-function toggleControls() { toggleContainer.hidden = uploadedImages.length === 0; }
-
-autoCrop.addEventListener('change', reprocessAll);
-autoEnhance.addEventListener('change', reprocessAll);
-grayscale.addEventListener('change', reprocessAll);
-async function reprocessAll() {
-  if (!uploadedImages.length) return;
-  processedImages = []; previewContainer.innerHTML = '<div class="spinner">Processing…</div>';
-  for (const f of uploadedImages) processedImages.push(await processImage(f));
-  renderPreviews();
-}
-
-createBtn.addEventListener('click', async () => {
-  if (!processedImages.length) return;
-  createBtn.disabled = true; createBtn.textContent = 'Creating…';
-  previewContainer.innerHTML = '<div class="spinner">Generating PDF…</div>';
-  try {
-    const pdf = await PDFLib.PDFDocument.create();
-    let page = pdf.addPage([A4_WIDTH, A4_HEIGHT]);
-    let y = A4_HEIGHT - MARGIN;
-    for (const file of processedImages) {
-      const buf = await file.arrayBuffer();
-      const img = await (file.type.includes('png') ? pdf.embedPng(buf) : pdf.embedJpg(buf));
-      let w = img.width, h = img.height;
-      const maxW = A4_WIDTH - 2*MARGIN, maxH = y - MARGIN;
-      if (w > maxW) { h = (maxW/w)*h; w = maxW; }
-      if (h > maxH) { w = (maxH/h)*w; h = maxH; }
-      if (y - h < MARGIN) { page = pdf.addPage([A4_WIDTH,A4_HEIGHT]); y = A4_HEIGHT - MARGIN; }
-      page.drawImage(img, { x:(A4_WIDTH-w)/2, y:y-h, width:w, height:h });
-      y -= h + 20;
+    } catch (err) {
+      console.error('detectEdges error', err);
+    } finally {
+      isProcessingFrame = false;
     }
-    const bytes = await pdf.save();
-    if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
-    pdfBlobUrl = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+  }
+
+  function startCountdown(){
+    if (autoCaptureTimer) return;
+    let seconds = 3;
+    countdownOverlay.textContent = seconds;
+    countdownOverlay.classList.add('show');
+    countdownInterval = setInterval(()=>{
+      seconds--;
+      countdownOverlay.textContent = seconds;
+      if (seconds<=0) {
+        clearInterval(countdownInterval);
+        capturePhoto.click();
+      }
+    },1000);
+    autoCaptureTimer = setTimeout(()=>{
+      clearInterval(countdownInterval);
+      countdownOverlay.classList.remove('show');
+      autoCaptureTimer = null;
+    },3500);
+  }
+  function cancelCountdown(){
+    if (autoCaptureTimer){
+      clearTimeout(autoCaptureTimer);
+      clearInterval(countdownInterval);
+      countdownOverlay.classList.remove('show');
+      autoCaptureTimer = null;
+    }
+  }
+
+  // DPR-aware overlay
+  function startEdgeDetection(){
+    const dpr = window.devicePixelRatio || 1;
+    edgeCanvas.width = Math.round(cameraVideo.clientWidth * dpr);
+    edgeCanvas.height = Math.round(cameraVideo.clientHeight * dpr);
+    edgeCanvas.style.width = `${cameraVideo.clientWidth}px`;
+    edgeCanvas.style.height = `${cameraVideo.clientHeight}px`;
+    const ctx = edgeCanvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    lastFrameTime = 0; stableFrames = 0;
+    if (!edgeRafId) edgeRafId = requestAnimationFrame(edgeLoop);
+  }
+  function edgeLoop(timestamp){
+    if (cameraModal.style.display !== 'flex') { edgeRafId = null; return; }
+    if (timestamp - lastFrameTime > 500) { detectEdges(); lastFrameTime = timestamp; }
+    edgeRafId = requestAnimationFrame(edgeLoop);
+  }
+
+  // ---- Flash helpers ----
+  async function setFlash(on){
+    try {
+      if (!track || !track.getCapabilities) return;
+      const caps = track.getCapabilities();
+      if (!caps.torch) return;
+      await track.applyConstraints({ advanced: [{ torch: on }]});
+    } catch(e){ console.warn('setFlash failed', e); }
+  }
+  function getLuminosity(){
+    processCtx.drawImage(cameraVideo,0,0,80,60);
+    const data = processCtx.getImageData(0,0,80,60).data;
+    let sum=0;
+    for (let i=0;i<data.length;i+=4) sum += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+    return sum / (data.length/4);
+  }
+  function startAutoFlash(){
+    if (autoFlashInterval) clearInterval(autoFlashInterval);
+    autoFlashInterval = setInterval(()=>{
+      if (flashMode !== 'auto') return;
+      const shouldFlash = getLuminosity() < 60;
+      setFlash(shouldFlash);
+      flashToggle.classList.toggle('active', shouldFlash);
+      flashToggle.setAttribute('aria-pressed', shouldFlash ? 'true' : 'false');
+    }, 500);
+  }
+  function cycleFlashMode(){
+    const modes = ['off','on','auto'];
+    flashMode = modes[(modes.indexOf(flashMode)+1) % modes.length];
+    flashToggle.className = '';
+    flashToggle.classList.toggle('active', false);
+    const isOn = flashMode === 'on' || (flashMode === 'auto' && getLuminosity() < 60);
+    flashToggle.classList.toggle('active', isOn);
+    if (flashMode === 'auto') flashToggle.classList.add('auto');
+    flashToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg> Flash ${flashMode.toUpperCase()}`;
+    flashToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+    if (flashMode === 'on') setFlash(true);
+    else if (flashMode === 'off') setFlash(false);
+    else startAutoFlash();
+  }
+
+  // ---- Camera open/close/capture ----
+  openCamera.addEventListener('click', async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video:{ facingMode:'environment', width:{ ideal:1280 }, height:{ ideal:720 } },
+        audio:false
+      });
+      track = stream.getVideoTracks()[0];
+      cameraVideo.srcObject = stream;
+      cameraModal.style.display = 'flex';
+      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+      if (caps.torch) {
+        flashToggle.style.display = 'flex';
+        flashToggle.onclick = cycleFlashMode;
+        flashMode = 'off';
+        cycleFlashMode();
+      } else {
+        flashToggle.style.display = 'none';
+      }
+      cameraVideo.onloadedmetadata = () => startEdgeDetection();
+    } catch (err) {
+      alert('Camera access denied or unavailable. Check permissions and HTTPS.');
+      console.error(err);
+    }
+  });
+
+  closeCamera.addEventListener('click', () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (autoFlashInterval) clearInterval(autoFlashInterval);
+    cancelCountdown();
+    cameraModal.style.display = 'none';
+    cameraVideo.srcObject = null;
+    stream = track = null;
+    if (edgeRafId) { cancelAnimationFrame(edgeRafId); edgeRafId = null; }
+  });
+
+  capturePhoto.addEventListener('click', async () => {
+    cancelCountdown();
+    const canvas = document.createElement('canvas');
+    canvas.width = cameraVideo.videoWidth; canvas.height = cameraVideo.videoHeight;
+    canvas.getContext('2d').drawImage(cameraVideo, 0, 0);
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], `photo-${Date.now()}.jpg`, { type:'image/jpeg' });
+      uploadedImages.push(file);
+      createBtn.disabled = true; downloadBtn.disabled = true;
+      processedImages.push(await processImage(file));
+      renderPreviews(); updateCounter(); toggleControls();
+      createBtn.disabled = false;
+    }, 'image/jpeg', 0.9);
+    closeCamera.click();
+  });
+
+  // ---- Processing pipeline ----
+  async function processImage(file) {
+    let working = file;
+    if (autoCrop.checked && cvReady) working = await autoCropImage(working);
+    return new Promise(resolve => {
+      const url = URL.createObjectURL(working);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        Caman(canvas, img, function(){
+          if (grayscale.checked) { this.greyscale(); this.contrast(25); this.sharpen(10); }
+          else if (autoEnhance.checked) { this.brightness(8); this.contrast(12); this.sharpen(8); this.vibrance(15); }
+          this.render(() => {
+            canvas.toBlob(blob => {
+              resolve(new File([blob], file.name, { type: blob.type }));
+              URL.revokeObjectURL(url);
+            }, working.type && working.type.includes('png') ? 'image/png' : 'image/jpeg', 0.95);
+          });
+        });
+      };
+      img.onerror = (e) => { console.error('processImage load error', e); URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  async function autoCropImage(file) {
+    if (!cvReady || !autoCrop.checked) return file;
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0);
+        const src = cv.imread(canvas);
+        const gray = new cv.Mat();
+        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+        cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
+        cv.Canny(gray, gray, 50, 150);
+        const contoursLocal = new cv.MatVector();
+        const hierarchyLocal = new cv.Mat();
+        cv.findContours(gray, contoursLocal, hierarchyLocal, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        let bestRect = null, largest = 0;
+        for (let i=0;i<contoursLocal.size();++i) {
+          const cnt = contoursLocal.get(i);
+          try {
+            const area = cv.contourArea(cnt);
+            if (area > largest && area > 5000) {
+              const peri = cv.arcLength(cnt, true);
+              const approx = new cv.Mat();
+              cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
+              if (approx.rows === 4) {
+                largest = area;
+                if (bestRect) bestRect.delete();
+                bestRect = approx;
+              } else {
+                approx.delete();
+              }
+            }
+          } finally { cnt.delete(); }
+        }
+
+        if (bestRect) {
+          const pts = [];
+          for (let j=0;j<4;++j) pts.push({ x: bestRect.data32S[j*2], y: bestRect.data32S[j*2+1] });
+          const ordered = pts.slice().sort((a,b)=>a.x-b.x);
+          const left = ordered.slice(0,2).sort((a,b)=>a.y-b.y);
+          const right = ordered.slice(2).sort((a,b)=>a.y-b.y);
+          const corners = [left[0], right[0], right[1], left[1]];
+          const w1 = distance(corners[0], corners[1]), w2 = distance(corners[3], corners[2]);
+          const h1 = distance(corners[1], corners[2]), h2 = distance(corners[0], corners[3]);
+          const width = Math.max(Math.round(w1), Math.round(w2)), height = Math.max(Math.round(h1), Math.round(h2));
+          const dst = cv.matFromArray(4,1,cv.CV_32FC2, [0,0, width-1,0, width-1,height-1, 0,height-1]);
+          const srcTri = cv.matFromArray(4,1,cv.CV_32FC2, [corners[0].x,corners[0].y, corners[1].x,corners[1].y, corners[2].x,corners[2].y, corners[3].x,corners[3].y]);
+          const M = cv.getPerspectiveTransform(srcTri, dst);
+          const warped = new cv.Mat();
+          cv.warpPerspective(src, warped, M, new cv.Size(width, height));
+          cv.imshow(canvas, warped);
+          warped.delete(); M.delete(); srcTri.delete(); dst.delete();
+          bestRect.delete();
+        }
+
+        canvas.toBlob(blob => {
+          const croppedFile = new File([blob], file.name, { type: file.type });
+          URL.revokeObjectURL(url);
+          resolve(croppedFile);
+        }, file.type && file.type.includes('png') ? 'image/png' : 'image/jpeg', 0.95);
+
+        src.delete(); gray.delete(); contoursLocal.delete(); hierarchyLocal.delete();
+      };
+      img.onerror = (e) => { console.error('autoCrop load error', e); URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  // ---- Upload & preview ----
+  uploadArea.addEventListener('click', (e) => { if (!e.target.closest('.camera-btn')) fileInput.click(); });
+  chooseBtn.addEventListener('click', () => fileInput.click());
+  ['dragover','dragenter'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.style.borderColor='var(--btn-green)'; }));
+  ['dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); uploadArea.style.borderColor='var(--border-upload)'; }));
+  uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+  fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+  async function handleFiles(files) {
+    const valid = Array.from(files).filter(f => f.type && f.type.startsWith('image/'));
+    if (!valid.length) return alert('Please upload images.');
+    createBtn.disabled = true; downloadBtn.disabled = true;
+    previewContainer.innerHTML = '<div class="spinner">Processing…</div>';
+    for (const f of valid) {
+      uploadedImages.push(f);
+      processedImages.push(await processImage(f));
+    }
+    renderPreviews(); updateCounter(); createBtn.disabled = false; toggleControls();
+  }
+
+  function removeImage(i){
+    if (i<0 || i>=uploadedImages.length) return;
+    uploadedImages.splice(i,1); processedImages.splice(i,1);
+    renderPreviews(); toggleControls(); updateCounter();
+  }
+
+  function renderPreviews(){
+    previewContainer.innerHTML = '';
+    processedImages.forEach((f,i) => {
+      const url = URL.createObjectURL(f);
+      const div = document.createElement('div'); div.className='preview-item'; div.dataset.index = i;
+      const imgEl = document.createElement('img'); imgEl.src = url; imgEl.alt = f.name;
+      imgEl.onload = () => { try { URL.revokeObjectURL(url); } catch(e){} };
+      const label = document.createElement('label'); label.title = f.name; label.textContent = f.name.slice(0,20) + (f.name.length>20 ? '...' : '');
+      const removeBtn = document.createElement('button'); removeBtn.className='remove'; removeBtn.textContent='X';
+      removeBtn.onclick = () => removeImage(i);
+      div.appendChild(imgEl); div.appendChild(label); div.appendChild(removeBtn);
+      previewContainer.appendChild(div);
+    });
+    initSortable();
+  }
+
+  function updateCounter(){ counterBox.textContent = `${uploadedImages.length} Image${uploadedImages.length!==1?'s':''} | Drag to Reorder`; }
+  function toggleControls(){ toggleContainer.hidden = uploadedImages.length === 0; }
+
+  function initSortable(){
+    new Sortable(previewContainer, {
+      animation:150, ghostClass:'sortable-ghost', onEnd: () => {
+        const order = Array.from(previewContainer.querySelectorAll('.preview-item')).map(el => parseInt(el.dataset.index));
+        uploadedImages = order.map(i => uploadedImages[i]);
+        processedImages = order.map(i => processedImages[i]);
+        renderPreviews();
+      }
+    });
+  }
+
+  autoCrop.addEventListener('change', reprocessAll);
+  autoEnhance.addEventListener('change', reprocessAll);
+  grayscale.addEventListener('change', reprocessAll);
+  async function reprocessAll(){
+    if (!uploadedImages.length) return;
+    processedImages = [];
+    previewContainer.innerHTML = '<div class="spinner">Processing…</div>';
+    createBtn.disabled = true; downloadBtn.disabled = true;
+    for (const f of uploadedImages) processedImages.push(await processImage(f));
+    renderPreviews(); createBtn.disabled = false;
+  }
+
+  // ---- PDF create & download ----
+  createBtn.addEventListener('click', async () => {
+    if (!processedImages.length) return;
+    createBtn.disabled = true; createBtn.textContent = 'Creating…';
+    previewContainer.innerHTML = '<div class="spinner">Generating PDF…</div>';
+    try {
+      const pdf = await PDFLib.PDFDocument.create();
+      let page = pdf.addPage([A4_WIDTH, A4_HEIGHT]); let y = A4_HEIGHT - MARGIN;
+      for (const file of processedImages) {
+        const buf = await file.arrayBuffer();
+        const img = file.type && file.type.includes('png') ? await pdf.embedPng(buf) : await pdf.embedJpg(buf);
+        let w = img.width, h = img.height;
+        const maxW = A4_WIDTH - 2*MARGIN, maxH = y - MARGIN;
+        if (w > maxW) { h = (maxW/w)*h; w = maxW; }
+        if (h > maxH) { w = (maxH/h)*w; h = maxH; }
+        if (y - h < MARGIN) { page = pdf.addPage([A4_WIDTH,A4_HEIGHT]); y = A4_HEIGHT - MARGIN; }
+        page.drawImage(img, { x:(A4_WIDTH-w)/2, y:y-h, width:w, height:h });
+        y -= h + 20;
+      }
+      const bytes = await pdf.save();
+      if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
+      pdfBlobUrl = URL.createObjectURL(new Blob([bytes], { type:'application/pdf' }));
+      const mode = [autoCrop.checked&&'cropped', autoEnhance.checked&&'enhanced', grayscale.checked&&'grayscale'].filter(Boolean).join('-')||'original';
+      previewContainer.innerHTML = `<div style="color:green;font-weight:600;">PDF Created! (${mode})</div>`;
+      downloadBtn.disabled = false;
+    } catch(e){ alert('Error creating PDF. See console.'); console.error(e); }
+    createBtn.disabled = false; createBtn.textContent = 'Create PDF';
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (!pdfBlobUrl) return;
+    const a = document.createElement('a');
+    a.href = pdfBlobUrl;
     const mode = [autoCrop.checked&&'cropped', autoEnhance.checked&&'enhanced', grayscale.checked&&'grayscale'].filter(Boolean).join('-')||'original';
-    previewContainer.innerHTML = `<div style="color:green;font-weight:600;">PDF Created! (${mode})</div>`;
-    downloadBtn.disabled = false;
-  } catch(e) { alert('Error'); console.error(e); }
-  createBtn.disabled = false; createBtn.textContent = 'Create PDF';
-});
+    a.download = `scanned-${mode}-${new Date().toISOString().slice(0,10)}.pdf`;
+    a.click();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(pdfBlobUrl); pdfBlobUrl = null; } catch(e){} }, 1000);
+  });
 
-downloadBtn.addEventListener('click', () => {
-  if (!pdfBlobUrl) return;
-  const a = document.createElement('a');
-  a.href = pdfBlobUrl;
-  const mode = [autoCrop.checked&&'cropped', autoEnhance.checked&&'enhanced', grayscale.checked&&'grayscale'].filter(Boolean).join('-')||'original';
-  a.download = `scanned-${mode}-${new Date().toISOString().slice(0,10)}.pdf`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(pdfBlobUrl), 1000);
-});
+  // ---- Theme & unload ----
+  const html = document.documentElement;
+  if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches)) html.dataset.theme = 'dark';
+  themeToggle.addEventListener('click', () => { html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark'; localStorage.theme = html.dataset.theme; });
 
-const themeToggle = document.getElementById('themeToggle');
-const html = document.documentElement;
-if (localStorage.theme === 'dark' || (!localStorage.theme && window.matchMedia('(prefers-color-scheme:dark)').matches)) html.dataset.theme = 'dark';
-themeToggle.addEventListener('click', () => {
-  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-  localStorage.theme = html.dataset.theme;
-});
+  window.addEventListener('beforeunload', () => {
+    if (pdfBlobUrl) try { URL.revokeObjectURL(pdfBlobUrl); } catch(e){}
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (autoFlashInterval) clearInterval(autoFlashInterval);
+  });
+
+  document.addEventListener('visibilitychange', () => { if (document.hidden) cancelCountdown(); });
+
+  // Done initialisation
+}); // end DOMContentLoaded
 </script>
 </body>
 </html>
