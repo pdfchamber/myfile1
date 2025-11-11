@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Scan to PDF – PDF Chamber</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- CropperJS CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
+
+<!-- Lightweight libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<style>
+  :root{
+    --accent:#00c6d8;
+    --header-bg:#0a8b65;
+    --card-bg:#fff;
+    --text-primary:#002B5B;
+    --text-secondary:#455A64;
+    --footer-bg:#0a8b65;
+    --footer-text:#ECEFF1;
+  }
+  [data-theme="dark"]{ --card-bg:#1B263B; --text-primary:#E0E1DD; --text-secondary:#778DA9; --footer-text:#E0E1DD; }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; -webkit-font-smoothing:antialiased}
+  body{display:flex;flex-direction:column;min-height:100vh;background:linear-gradient(135deg,#aef1fc 0%,#E3F2FD 50%,#90CAF9 100%);color:var(--text-primary)}
+
+  /* HEADER (desktop) */
+  header{background:var(--header-bg);padding:1rem 5%;box-shadow:0 4px 20px rgba(0,0,0,0.12);position:fixed;top:0;width:100%;z-index:1200}
+  .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.8rem;color:#fff;text-decoration:none}
+  .logo svg{width:44px;height:44px;fill:#fff}
+  .tagline{font-size:.95rem;color:#E2E8F0}
+  .theme-toggle{width:56px;height:30px;background:rgba(255,255,255,0.18);border:2px solid #fff;border-radius:50px;position:relative;cursor:pointer}
+  .theme-toggle::before{content:'';position:absolute;top:3px;left:4px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .3s ease}
+  [data-theme="dark"] .theme-toggle::before{transform:translateX(24px);background:#1B263B}
+
+  /* MAIN (desktop) */
+  main{margin-top:90px;flex:1;display:flex;flex-direction:column;align-items:center;padding:1rem 1rem 3rem;text-align:center;overflow:auto}
+  h2{font-size:2.6rem;font-weight:700;background:linear-gradient(90deg,#74ea00,#00AEEF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+  .subtext{font-size:1.4rem;color:var(--header-bg);margin-bottom:1.6rem;font-weight:600}
+
+  /* QR box */
+  .qr-section{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;width:100%}
+  .qr-box{background:var(--card-bg);border:3px solid #005f99;padding:2rem;border-radius:18px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 0 25px rgba(0,95,153,0.4)}
+  .qr-box::before{content:'';position:absolute;inset:0;border-radius:18px;border:2px solid var(--accent);box-shadow:0 0 20px var(--accent);opacity:0.9;z-index:0}
+  .qr-box img{width:220px;height:220px;position:relative;z-index:1}
+
+  /* features */
+  .features{display:flex;justify-content:center;align-items:stretch;gap:2rem;margin-top:2.5rem;width:95%;max-width:1400px;flex-wrap:wrap}
+  .feature-card{flex:1;background:var(--card-bg);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.08);border:2px solid #005f99;padding:2rem;min-width:280px;max-width:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .28s,box-shadow .28s}
+  .feature-card h3{color:#005f99;font-size:1.35rem;font-weight:700;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .feature-card p{color:var(--text-secondary);font-size:1.05rem;text-align:center;line-height:1.4}
+  .feature-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 0 30px rgba(0,198,216,0.22)}
+
+  /* footer (links above copy) */
+  footer{margin-top:auto;background:var(--footer-bg);color:var(--footer-text);padding:2rem 5%;text-align:center;font-size:.9rem}
+  .footer-links{margin-bottom:.75rem}
+  .footer-links a{color:#fff;margin:0 1rem;text-decoration:underline;font-weight:500}
+
+  /* ---------------- Mobile scanner UI - full screen preview ---------------- */
+  /* hidden by default; shown on mobile by JS */
+  .mobile-scanner{display:none}
+  .mobile-topbar{
+    position:fixed;left:0;right:0;top:8px;margin:auto;width:100%;max-width:920px;padding:8px;z-index:1400;display:flex;align-items:center;gap:8px;justify-content:flex-start;
+    background:rgba(0,0,0,0.25);backdrop-filter:blur(6px);border-radius:10px;margin-left:8px;margin-right:8px;
+  }
+  .mobile-topbar .mini-logo{display:flex;align-items:center;gap:8px;color:#fff;font-weight:600}
+  .mobile-topbar img{width:28px;height:28px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4))}
+
+  .camera-fullscreen{
+    position:fixed;left:0;right:0;top:56px;bottom:56px;background:#000;display:flex;align-items:center;justify-content:center;z-index:1300;padding:6px;
+  }
+  video#preview{width:100%;height:100%;object-fit:cover;border-radius:10px;border:3px solid rgba(255,255,255,0.06)}
+  #captureCanvas{display:none}
+
+  /* neon detected rectangle */
+  .detected-rect{position:absolute;pointer-events:none;border:3px solid var(--accent);box-shadow:0 0 22px var(--accent),0 0 44px rgba(0,198,216,0.18);border-radius:8px;transition:all .12s ease;mix-blend-mode:screen}
+
+  /* controls panel (bottom) */
+  .mobile-controls{
+    position:fixed;left:0;right:0;bottom:6px;z-index:1400;display:flex;justify-content:center;padding:8px;pointer-events:auto;
+  }
+  .controls-inner{display:flex;gap:8px;align-items:center;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:10px;border-radius:12px;backdrop-filter:blur(6px)}
+  .btn{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:#fff;font-weight:600}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#2ddfc9);color:#012}
+  .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.06)}
+
+  .pages{display:flex;gap:8px;overflow:auto;padding:6px;align-items:center;max-width:90vw}
+  .page-thumb{width:80px;height:108px;border-radius:8px;overflow:hidden;background:#07121a;border:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;position:relative}
+  .page-thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb-controls{position:absolute;right:6px;top:6px;display:flex;flex-direction:column;gap:6px}
+
+  /* cropper modal */
+  #cropperModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1600;align-items:center;justify-content:center;padding:12px}
+  #cropperModal .modal{width:100%;max-width:920px;background:#fff;border-radius:10px;overflow:hidden}
+  #cropperImage{max-width:100%;display:block;background:#000;padding:6px}
+
+  /* small screens show scanner and hide desktop elements */
+  @media(max-width:900px){
+    .mobile-scanner{display:block}
+    #desktopMain,#featuresSection{display:none}
+    header, footer{display:none} /* hide desktop header/footer on mobile to maximize camera area */
+  }
+
+  /* ensure readable white text on controls where needed */
+  .controls-inner .btn, .controls-inner select, .controls-inner input { color: #fff; }
+  select, input[type=range] { background: rgba(0,0,0,0.25); color:#fff; border:none; padding:6px 8px; border-radius:8px; }
+</style>
+</head>
+<body>
+  <!-- Desktop header (kept unchanged) -->
+  <header id="siteHeader">
+    <div class="header-inner">
+      <a class="logo" href="index.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+        PDF Chamber
+      </a>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="tagline">Smart PDFs, Seamless Productivity</div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme"></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Desktop content (unchanged) -->
+    <section id="desktopMain" class="qr-section">
+      <h2>Scan to PDF</h2>
+      <div class="subtext">Scan this QR code using your mobile device to open the Scan to PDF tool.</div>
+      <div class="qr-box">
+        <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https://example.com/scan-to-pdf.html&color=00c6d8" alt="Scan QR">
+      </div>
+    </section>
+
+    <section id="featuresSection" class="features" aria-label="features">
+      <div class="feature-card"><h3>📸 Instant Scanning</h3><p>Capture documents or notes using your camera and convert them into high-quality PDFs.</p></div>
+      <div class="feature-card"><h3>🧠 Smart Auto-Crop</h3><p>Automatically detect document edges and crop them perfectly for a clean, professional look.</p></div>
+      <div class="feature-card"><h3>☁️ Share Easily</h3><p>Download or share your PDF instantly — seamless, secure, and always accessible.</p></div>
+    </section>
+
+    <!-- MOBILE SCANNER (hidden on desktop) -->
+    <section id="mobileScanner" class="mobile-scanner hidden" aria-hidden="true">
+      <!-- small white brand overlay (keeps camera visible) -->
+      <div class="mobile-topbar" id="mobileTopbar" style="display:none">
+        <div class="mini-logo">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23FFFFFF' d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z'/></svg>" alt="logo">
+          <span style="color:#fff">PDF Chamber</span>
+        </div>
+      </div>
+
+      <!-- camera fullscreen area -->
+      <div class="camera-fullscreen" id="cameraArea">
+        <video id="preview" autoplay playsinline></video>
+        <canvas id="captureCanvas"></canvas>
+        <div id="detectedRect" class="detected-rect" style="display:none"></div>
+      </div>
+
+      <!-- controls bottom -->
+      <div class="mobile-controls" id="mobileControls" style="display:none">
+        <div class="controls-inner">
+          <button id="snapBtn" class="btn primary">Capture</button>
+          <button id="uploadBtn" class="btn">Upload</button>
+          <input id="fileInput" type="file" accept="image/*" multiple style="display:none">
+          <div style="width:8px"></div>
+          <select id="paperSelect" style="min-width:100px">
+            <option value="a4">A4</option><option value="letter">Letter</option><option value="legal">Legal</option><option value="square">Square</option>
+          </select>
+          <select id="filterSelect">
+            <option value="none">Filter: None</option><option value="gray">Grayscale</option><option value="bw">Black & White</option><option value="sepia">Sepia</option><option value="hd">Sharpen</option>
+          </select>
+          <label style="font-size:12px;margin-left:6px">B</label><input id="brightness" type="range" min="-60" max="60" value="0">
+          <label style="font-size:12px">C</label><input id="contrast" type="range" min="-60" max="60" value="0">
+          <button id="addPageBtn" class="btn">Add</button>
+          <button id="downloadBtn" class="btn primary">Download</button>
+          <button id="shareBtn" class="btn">Share</button>
+        </div>
+      </div>
+
+      <!-- thumbnails -->
+      <div style="position:fixed;left:8px;right:8px;bottom:120px;display:flex;justify-content:center;z-index:1400">
+        <div class="pages" id="pages"></div>
+      </div>
+
+      <!-- cropper modal (edit after capture/upload) -->
+      <div id="cropperModal">
+        <div class="modal">
+          <div style="padding:8px;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-weight:700">Edit & Adjust</div>
+            <div style="display:flex;gap:8px">
+              <button id="cropCancel" class="btn">Cancel</button>
+              <button id="cropApply" class="btn primary">Apply</button>
+            </div>
+          </div>
+          <div style="background:#000;padding:12px;display:flex;justify-content:center">
+            <img id="cropperImage" alt="editor">
+          </div>
+          <div style="display:flex;gap:8px;padding:10px;justify-content:center;align-items:center">
+            <label style="font-size:13px;color:#333">B</label><input id="cropBrightness" type="range" min="-60" max="60" value="0" style="width:140px">
+            <label style="font-size:13px;color:#333">C</label><input id="cropContrast" type="range" min="-60" max="60" value="0" style="width:140px">
+            <select id="cropFilter" class="btn ghost" style="padding:6px 8px">
+              <option value="none">None</option><option value="bw">B/W</option><option value="gray">Gray</option><option value="sepia">Sepia</option><option value="hd">HD</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="siteFooter">
+    <div class="footer-links">
+      <a href="#">About</a><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Support</a>
+    </div>
+    <div>© 2025 PDF Chamber. All rights reserved.</div>
+  </footer>
+
+<script>
+/* ========== Theme toggle ========== */
+const themeToggle = document.getElementById('themeToggle');
+const setTheme = t => document.documentElement.setAttribute('data-theme', t);
+setTheme(localStorage.getItem('theme') || 'light');
+themeToggle.addEventListener('click', () => {
+  const newT = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(newT);
+  localStorage.setItem('theme', newT);
+});
+
+/* ========== DOM refs ========== */
+const desktopMain = document.getElementById('desktopMain');
+const featuresSection = document.getElementById('featuresSection');
+const mobileScanner = document.getElementById('mobileScanner');
+
+const preview = document.getElementById('preview');
+const captureCanvas = document.getElementById('captureCanvas');
+const snapBtn = document.getElementById('snapBtn');
+const uploadBtn = document.getElementById('uploadBtn');
+const fileInput = document.getElementById('fileInput');
+const pagesEl = document.getElementById('pages');
+const filterSelect = document.getElementById('filterSelect');
+const brightness = document.getElementById('brightness');
+const contrast = document.getElementById('contrast');
+const addPageBtn = document.getElementById('addPageBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const shareBtn = document.getElementById('shareBtn');
+const paperSelect = document.getElementById('paperSelect');
+
+const cropperModal = document.getElementById('cropperModal');
+const cropperImage = document.getElementById('cropperImage');
+const cropApply = document.getElementById('cropApply');
+const cropCancel = document.getElementById('cropCancel');
+const cropBrightness = document.getElementById('cropBrightness');
+const cropContrast = document.getElementById('cropContrast');
+const cropFilter = document.getElementById('cropFilter');
+
+const mobileTopbar = document.getElementById('mobileTopbar');
+const mobileControls = document.getElementById('mobileControls');
+const detectedRect = document.getElementById('detectedRect');
+
+let stream = null;
+let cameraStarted = false;
+let pages = []; // {dataUrl,w,h}
+let cropperInstance = null;
+let editingIndex = null;
+
+/* ========== Utilities ========== */
+const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 900;
+const toDataURL = file => new Promise((res,rej)=>{ const r = new FileReader(); r.onload = ()=>res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+const loadImage = src => new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src; img.crossOrigin='anonymous'; });
+
+/* ========== Switch view ========== */
+function switchView(){
+  if(isMobile()){
+    // Hide desktop header/footer, show minimal mobile UI
+    document.getElementById('siteHeader').style.display = 'none';
+    document.getElementById('siteFooter').style.display = 'none';
+    document.getElementById('desktopMain').style.display = 'none';
+    document.getElementById('featuresSection').style.display = 'none';
+    mobileScanner.classList.remove('hidden');
+    mobileScanner.setAttribute('aria-hidden','false');
+
+    // show mobile topbar & controls
+    mobileTopbar.style.display = 'flex';
+    mobileControls.style.display = 'flex';
+    detectedRect.style.display = 'none';
+    // auto-start camera
+    startCamera();
+  } else {
+    // desktop: show header/footer and desktop UI
+    document.getElementById('siteHeader').style.display = '';
+    document.getElementById('siteFooter').style.display = '';
+    document.getElementById('desktopMain').style.display = '';
+    document.getElementById('featuresSection').style.display = '';
+    mobileScanner.classList.add('hidden');
+    mobileScanner.setAttribute('aria-hidden','true');
+    stopCamera();
+  }
+}
+window.addEventListener('resize', switchView);
+document.addEventListener('DOMContentLoaded', () => {
+  // update QR to current URL
+  try{ document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(window.location.href) + '&color=00c6d8'; }catch(e){}
+  switchView();
+});
+
+/* ========== Camera start/stop & detection ========== */
+async function startCamera(){
+  if(cameraStarted) return;
+  try{
+    const constraints = { video: { facingMode: { ideal: 'environment' }, width: { ideal: 2560 }, height: { ideal: 1920 }, frameRate: { ideal: 30 } }, audio:false };
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    preview.srcObject = stream;
+    await preview.play();
+    cameraStarted = true;
+    detectLoopStart();
+  }catch(e){
+    console.warn('camera start failed', e);
+    // If failed, still show UI for upload
+  }
+}
+function stopCamera(){
+  if(stream){ try{ stream.getTracks().forEach(t => t.stop()); }catch(e){} stream=null; }
+  cameraStarted = false;
+  detectLoopStop();
+}
+
+/* Lightweight Sobel-like auto-detect */
+let detectTimer = null;
+function detectLoopStart(){ if(detectTimer) return; detectTimer = setInterval(()=>{ try{ detectDocument(); }catch(e){} }, 600); }
+function detectLoopStop(){ if(!detectTimer) return; clearInterval(detectTimer); detectTimer = null; }
+
+function detectDocument(){
+  if(preview.readyState < 2) return;
+  const w = preview.videoWidth || preview.clientWidth;
+  const h = preview.videoHeight || preview.clientHeight;
+  const tmp = document.createElement('canvas'); tmp.width = 240; tmp.height = Math.round(240 * h / w);
+  const tctx = tmp.getContext('2d'); tctx.drawImage(preview, 0, 0, tmp.width, tmp.height);
+  const imgd = tctx.getImageData(0,0,tmp.width,tmp.height).data;
+  const gray = new Uint8ClampedArray(tmp.width * tmp.height);
+  for(let i=0;i<tmp.width*tmp.height;i++){
+    gray[i] = (0.3*imgd[i*4] + 0.59*imgd[i*4+1] + 0.11*imgd[i*4+2]);
+  }
+  const sob = new Uint8ClampedArray(tmp.width * tmp.height);
+  for(let y=1;y<tmp.height-1;y++){
+    for(let x=1;x<tmp.width-1;x++){
+      const idx = y*tmp.width + x;
+      const gx = -gray[idx-tmp.width-1] - 2*gray[idx-1] - gray[idx+tmp.width-1] + gray[idx-tmp.width+1] + 2*gray[idx+1] + gray[idx+tmp.width+1];
+      const gy = -gray[idx-tmp.width-1] - 2*gray[idx-tmp.width] - gray[idx-tmp.width+1] + gray[idx+tmp.width-1] + 2*gray[idx+tmp.width] + gray[idx+tmp.width+1];
+      const mag = Math.min(255, Math.abs(gx) + Math.abs(gy));
+      sob[idx] = mag;
+    }
+  }
+  let minx=tmp.width, miny=tmp.height, maxx=0, maxy=0, count=0;
+  for(let y=0;y<tmp.height;y++){
+    for(let x=0;x<tmp.width;x++){
+      const v = sob[y*tmp.width + x];
+      if(v > 100){
+        if(x<minx) minx = x; if(x>maxx) maxx = x;
+        if(y<miny) miny = y; if(y>maxy) maxy = y;
+        count++;
+      }
+    }
+  }
+  if(count < 80){ detectedRect.style.display = 'none'; return; }
+  const pad = Math.round(Math.min(tmp.width,tmp.height) * 0.02);
+  minx = Math.max(0, minx-pad); miny = Math.max(0, miny-pad); maxx = Math.min(tmp.width, maxx+pad); maxy = Math.min(tmp.height, maxy+pad);
+  // convert to preview element percentages
+  const leftPct = (minx / tmp.width) * 100, topPct = (miny / tmp.height) * 100;
+  const widthPct = ((maxx-minx) / tmp.width) * 100, heightPct = ((maxy-miny) / tmp.height) * 100;
+  const r = detectedRect;
+  r.style.display = 'block';
+  r.style.left = leftPct + '%'; r.style.top = topPct + '%'; r.style.width = widthPct + '%'; r.style.height = heightPct + '%';
+}
+
+/* ========== Capture & edit flow ========== */
+snapBtn.addEventListener('click', async ()=>{
+  if(preview.readyState < 2 && !stream){ alert('Camera not available. Use Upload instead.'); return; }
+  if(preview.readyState >= 2){
+    const vw = preview.videoWidth || preview.clientWidth;
+    const vh = preview.videoHeight || preview.clientHeight;
+    captureCanvas.width = vw; captureCanvas.height = vh;
+    const ctx = captureCanvas.getContext('2d');
+    ctx.drawImage(preview, 0, 0, vw, vh);
+    const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.95);
+    openCropperModal(dataUrl, true);
+  }
+});
+
+/* Upload */
+uploadBtn.addEventListener('click', ()=> fileInput.click());
+fileInput.addEventListener('change', async (ev)=>{
+  const files = Array.from(ev.target.files);
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    const dataUrl = await toDataURL(f);
+    openCropperModal(dataUrl, true);
+  }
+  fileInput.value = '';
+});
+
+/* Cropper modal: open, apply, cancel */
+function openCropperModal(src, pushAfterApply=true){
+  cropperModal.style.display = 'flex';
+  cropperImage.src = src;
+  cropBrightness.value = 0; cropContrast.value = 0; cropFilter.value = 'none';
+  cropperImage.onload = () => {
+    if(cropperInstance){ try{ cropperInstance.destroy(); }catch(e){} cropperInstance=null; }
+    cropperInstance = new Cropper(cropperImage, { viewMode:1, autoCropArea:0.95, movable:true, zoomable:true, rotatable:false });
+  };
+  cropCancel.onclick = ()=>{ cropperModal.style.display='none'; try{ cropperInstance.destroy(); }catch(e){} cropperInstance=null; editingIndex=null; };
+  cropApply.onclick = ()=>{
+    try{
+      const c = cropperInstance.getCroppedCanvas({ imageSmoothingQuality: 'high' });
+      const ctx = c.getContext('2d');
+      let imgd = ctx.getImageData(0,0,c.width,c.height);
+      applyBrightnessContrast(imgd, parseInt(cropBrightness.value||0), parseInt(cropContrast.value||0));
+      applyFilter(imgd, cropFilter.value);
+      ctx.putImageData(imgd,0,0);
+      const finalUrl = c.toDataURL('image/jpeg', 0.95);
+      if(editingIndex === null) pages.push({ dataUrl: finalUrl, w: c.width, h: c.height });
+      else pages[editingIndex] = { dataUrl: finalUrl, w: c.width, h: c.height };
+      renderPages();
+    }catch(e){ console.error(e); alert('Could not apply edit'); }
+    cropperModal.style.display = 'none';
+    try{ cropperInstance.destroy(); }catch(e){} cropperInstance = null;
+    editingIndex = null;
+  };
+}
+
+/* Brightness/Contrast + filters functions */
+function applyBrightnessContrast(imgd, brightnessValue, contrastValue){
+  const data = imgd.data; const b = brightnessValue|0; const c = contrastValue/100;
+  const factor = (259*(c*255+255))/(255*(259 - c*255));
+  for(let i=0;i<data.length;i+=4){
+    for(let j=0;j<3;j++){
+      let v = data[i+j];
+      v = v + b;
+      v = factor * (v - 128) + 128;
+      data[i+j] = Math.max(0,Math.min(255,Math.round(v)));
+    }
+  }
+}
+function applyFilter(imgd, filter){
+  const d = imgd.data, len = d.length;
+  if(filter === 'none') return;
+  if(filter === 'gray' || filter === 'bw'){
+    for(let i=0;i<len;i+=4){ const a = Math.round(0.3*d[i]+0.59*d[i+1]+0.11*d[i+2]); d[i]=d[i+1]=d[i+2]=a; }
+    if(filter === 'bw') for(let i=0;i<len;i+=4){ const v = d[i]; const out = v>120?255:0; d[i]=d[i+1]=d[i+2]=out; }
+  } else if(filter === 'sepia'){
+    for(let i=0;i<len;i+=4){ const r=d[i], g=d[i+1], b=d[i+2]; d[i]=Math.min(255,Math.round(r*0.393+g*0.769+b*0.189)); d[i+1]=Math.min(255,Math.round(r*0.349+g*0.686+b*0.168)); d[i+2]=Math.min(255,Math.round(r*0.272+g*0.534+b*0.131)); }
+  } else if(filter === 'hd'){
+    const w = imgd.width, h = imgd.height, copy=new Uint8ClampedArray(d);
+    for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){ const i=(y*w+x)*4; for(let c=0;c<3;c++){ const blurred=(copy[i-4+c]+copy[i+4+c]+copy[i-4*w+c]+copy[i+4*w+c]+copy[i+c])/5; const diff=copy[i+c]-blurred; let nv = copy[i+c] + diff*0.85; d[i+c]=Math.max(0,Math.min(255,nv)); } }
+  }
+}
+
+/* Thumbnails */
+function renderPages(){
+  pagesEl.innerHTML = '';
+  pages.forEach((p, idx)=>{
+    const div = document.createElement('div'); div.className = 'page-thumb';
+    const img = document.createElement('img'); img.src = p.dataUrl; div.appendChild(img);
+    const ctrl = document.createElement('div'); ctrl.className = 'thumb-controls';
+    const edit = document.createElement('button'); edit.className='btn'; edit.textContent='✎'; edit.title='Edit';
+    const del = document.createElement('button'); del.className='btn'; del.textContent='🗑'; del.title='Delete';
+    edit.onclick = ()=>{ editingIndex = idx; openCropperModal(pages[idx].dataUrl, false); };
+    del.onclick = ()=>{ pages.splice(idx,1); renderPages(); };
+    ctrl.appendChild(edit); ctrl.appendChild(del);
+    div.appendChild(ctrl);
+    pagesEl.appendChild(div);
+  });
+}
+
+/* Add page alias */
+addPageBtn.addEventListener('click', ()=> snapBtn.click());
+
+/* ========== PDF export (pdf-lib) ========== */
+downloadBtn.addEventListener('click', async ()=>{
+  if(pages.length === 0){ alert('No pages to download'); return; }
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  for(let i=0;i<pages.length;i++){
+    const p = pages[i];
+    const imgBytes = await (await fetch(p.dataUrl)).arrayBuffer();
+    const isPng = p.dataUrl.indexOf('png') !== -1;
+    let embedded = null;
+    try{ embedded = isPng ? await pdfDoc.embedPng(imgBytes) : await pdfDoc.embedJpg(imgBytes); } catch(e){ embedded = await pdfDoc.embedJpg(imgBytes); }
+    // paper sizes in pts (72pt = 1in)
+    const paper = paperSelect.value || 'a4';
+    let pw = 595.28, ph = 841.89; // A4
+    if(paper === 'letter'){ pw = 612; ph = 792; } else if(paper === 'legal'){ pw = 612; ph = 1008; } else if(paper === 'square'){ pw = 700; ph = 700; }
+    const page = pdfDoc.addPage([pw,ph]);
+    const px = embedded.width, py = embedded.height;
+    const scale = Math.min(pw/px, ph/py);
+    const drawW = px * scale, drawH = py * scale;
+    const x = (pw - drawW)/2, y = (ph - drawH)/2;
+    page.drawImage(embedded, { x, y, width: drawW, height: drawH });
+  }
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  saveAs(blob, 'scans.pdf');
+});
+
+/* Web Share (mobile) */
+shareBtn.addEventListener('click', async ()=>{
+  if(pages.length === 0){ alert('No pages to share'); return; }
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  for(let i=0;i<pages.length;i++){
+    const p = pages[i];
+    const imgBytes = await (await fetch(p.dataUrl)).arrayBuffer();
+    const isPng = p.dataUrl.indexOf('png') !== -1;
+    let embedded = null;
+    try{ embedded = isPng ? await pdfDoc.embedPng(imgBytes) : await pdfDoc.embedJpg(imgBytes); } catch(e){ embedded = await pdfDoc.embedJpg(imgBytes); }
+    const page = pdfDoc.addPage([embedded.width, embedded.height]);
+    page.drawImage(embedded, { x:0, y:0, width:embedded.width, height:embedded.height });
+  }
+  const pdfBytes = await pdfDoc.save();
+  const file = new File([pdfBytes], 'scans.pdf', { type: 'application/pdf' });
+  try{
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], title:'Scanned document', text:'Scanned with PDF Chamber' });
+      return;
+    }
+  }catch(e){}
+  saveAs(new Blob([pdfBytes], { type:'application/pdf' }), 'scans.pdf');
+});
+
+/* Cleanup */
+window.addEventListener('pagehide', ()=>{ stopCamera(); });
+
+</script>
+</body>
+</html>
