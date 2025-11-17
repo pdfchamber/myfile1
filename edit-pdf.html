@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF Editor</title>
+  <!-- PDF.js -->
+  <script src="https://unpkg.com/pdfjs-dist@4.5.136/build/pdf.min.js"></script>
+  <script>
+    // Configure PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@4.5.136/build/pdf.worker.min.js";
+  </script>
+  <!-- Fabric.js -->
+  <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
+  <!-- pdf-lib -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --muted: #8892a6;
+      --primary: #3b82f6;
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --text: #e5e7eb;
+      --btn: #222733;
+      --btn-hover: #2b3242;
+      --border: #2a2f3a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      height: 100vh; display: flex; flex-direction: column;
+    }
+    header {
+      display: flex; gap: 10px; align-items: center; padding: 10px 12px;
+      background: var(--panel); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10; flex-wrap: wrap;
+    }
+    header .group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      background: var(--btn); color: var(--text); border: 1px solid var(--border);
+      padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    }
+    .btn:hover { background: var(--btn-hover); }
+    .btn.primary { background: var(--primary); border-color: transparent; }
+    .btn.accent { background: var(--accent); border-color: transparent; }
+    .btn.danger { background: var(--danger); border-color: transparent; }
+    .btn-icon { padding: 8px; width: 38px; height: 38px; display: grid; place-items: center; }
+    .segmented {
+      display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    }
+    .segmented button {
+      background: var(--btn); color: var(--text); border: none; padding: 8px 10px; cursor: pointer;
+    }
+    .segmented button.active { background: var(--primary); }
+    .divider { width: 1px; height: 28px; background: var(--border); margin: 0 6px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    input[type="color"], input[type="range"], select {
+      background: var(--btn); color: var(--text); border: 1px solid var(--border);
+      padding: 6px; border-radius: 8px;
+    }
+    input[type="file"] { display: none; }
+    label.file { cursor: pointer; }
+    main {
+      flex: 1; display: grid; place-items: center; padding: 10px;
+      overflow: auto;
+    }
+    .page-wrap {
+      position: relative; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      border-radius: 6px; overflow: hidden; touch-action: none;
+    }
+    canvas { display: block; }
+    .overlay {
+      position: absolute; left: 0; top: 0; pointer-events: none;
+      color: #fff; font-weight: 600; background: rgba(0,0,0,0.2); padding: 2px 6px; border-bottom-right-radius: 6px;
+    }
+    footer {
+      display: flex; gap: 10px; align-items: center; justify-content: center;
+      padding: 8px 10px; background: var(--panel); border-top: 1px solid var(--border);
+    }
+    @media (max-width: 820px) {
+      header { position: fixed; top: auto; bottom: 0; width: 100%; }
+      main { padding-bottom: 76px; }
+      .segmented { width: 100%; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="group">
+      <label for="file-input" class="btn file">Open PDF</label>
+      <input type="file" id="file-input" accept="application/pdf" />
+      <button id="prevPage" class="btn-icon" title="Previous page">&#8592;</button>
+      <span class="muted" id="pageInfo">Page 0 / 0</span>
+      <button id="nextPage" class="btn-icon" title="Next page">&#8594;</button>
+      <div class="divider"></div>
+      <div class="segmented" id="toolset">
+        <button data-tool="select" class="active" title="Select">&#128397;</button>
+        <button data-tool="text" title="Text">&#9998;</button>
+        <button data-tool="image" title="Image">&#128247;</button>
+        <button data-tool="rect" title="Rectangle">&#9633;</button>
+        <button data-tool="ellipse" title="Ellipse">&#9675;</button>
+        <button data-tool="line" title="Line">&#9473;</button>
+        <button data-tool="pen" title="Pen">&#9997;</button>
+        <button data-tool="highlighter" title="Highlighter">&#11036;</button>
+        <button data-tool="eraser" title="Eraser">&#9003;</button>
+      </div>
+      <div class="divider"></div>
+      <div class="group">
+        <label class="muted">Stroke</label>
+        <input type="color" id="strokeColor" value="#ff4757" />
+        <input type="range" id="strokeWidth" min="1" max="30" value="3" />
+        <label class="muted">Fill</label>
+        <input type="color" id="fillColor" value="#00000000" />
+        <select id="fontSize">
+          <option value="14">14</option>
+          <option value="18" selected>18</option>
+          <option value="24">24</option>
+          <option value="32">32</option>
+          <option value="48">48</option>
+        </select>
+        <button id="deleteSelected" class="btn danger" title="Delete selected">Delete</button>
+        <button id="clearAll" class="btn danger" title="Clear annotations">Clear</button>
+      </div>
+    </div>
+    <div class="group" style="margin-left:auto">
+      <button id="undoBtn" class="btn">Undo</button>
+      <button id="redoBtn" class="btn">Redo</button>
+      <button id="downloadBtn" class="btn accent">Download PDF</button>
+      <button id="shareBtn" class="btn primary">Share</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="pageWrap" class="page-wrap" style="display:none;">
+      <canvas id="pdfCanvas"></canvas>
+      <canvas id="fabCanvas" ></canvas>
+      <div class="overlay" id="zoomInfo">100%</div>
+    </div>
+    <div id="placeholder" class="muted">Open a PDF to start editing.</div>
+  </main>
+
+  <footer>
+    <span class="muted">Pinch to zoom on touch devices. Mouse wheel zoom on desktop.</span>
+  </footer>
+
+  <script>
+    // Elements
+    const fileInput = document.getElementById('file-input');
+    const pageWrap = document.getElementById('pageWrap');
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const fabCanvasEl = document.getElementById('fabCanvas');
+    const pageInfo = document.getElementById('pageInfo');
+    const zoomInfo = document.getElementById('zoomInfo');
+    const toolset = document.getElementById('toolset');
+    const placeholder = document.getElementById('placeholder');
+
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const strokeColor = document.getElementById('strokeColor');
+    const strokeWidth = document.getElementById('strokeWidth');
+    const fillColor = document.getElementById('fillColor');
+    const fontSize = document.getElementById('fontSize');
+    const deleteSelected = document.getElementById('deleteSelected');
+    const clearAll = document.getElementById('clearAll');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const shareBtn = document.getElementById('shareBtn');
+
+    // State
+    let pdfDoc = null;
+    let currentPage = 1;
+    let scale = 1.2;
+    let viewerScale = 1.0; // additional UI zoom
+    let rendering = false;
+    let fabricCanvas = null;
+    let history = []; // snapshots per page
+    let historyIndex = -1;
+    const pageStates = new Map(); // page -> JSON annotation state string
+
+    // Init Fabric
+    function initFabric() {
+      if (fabricCanvas) {
+        fabricCanvas.dispose();
+      }
+      fabricCanvas = new fabric.Canvas('fabCanvas', {
+        selection: true,
+        backgroundColor: null,
+        preserveObjectStacking: true
+      });
+      fabCanvasEl.style.position = 'absolute';
+      fabCanvasEl.style.left = '0';
+      fabCanvasEl.style.top = '0';
+      fabCanvasEl.style.pointerEvents = 'auto';
+
+      // History capture
+      const saveHistory = () => {
+        if (!fabricCanvas) return;
+        const json = fabricCanvas.toDatalessJSON();
+        // push clone to history
+        history = history.slice(0, historyIndex + 1);
+        history.push(json);
+        historyIndex++;
+        savePageState();
+      };
+      fabricCanvas.on('object:added', (e) => {
+        if (e.target && e.target._skipHistory) return;
+        saveHistory();
+      });
+      fabricCanvas.on('object:modified', saveHistory);
+      fabricCanvas.on('object:removed', saveHistory);
+
+      // Touch gestures for pan/zoom on wrapper
+      let lastScale = 1;
+      let startDist = 0;
+      let touchMode = false;
+
+      pageWrap.addEventListener('wheel', (e) => {
+        if (!pdfDoc) return;
+        e.preventDefault();
+        const delta = Math.sign(e.deltaY);
+        const factor = delta > 0 ? 0.9 : 1.1;
+        setViewerScale(viewerScale * factor);
+      }, { passive: false });
+
+      pageWrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          touchMode = true;
+          startDist = getTouchDist(e.touches);
+          lastScale = viewerScale;
+        }
+      }, { passive: true });
+
+      pageWrap.addEventListener('touchmove', (e) => {
+        if (touchMode && e.touches.length === 2) {
+          e.preventDefault();
+          const newDist = getTouchDist(e.touches);
+          const factor = newDist / startDist;
+          setViewerScale(lastScale * factor);
+        }
+      }, { passive: false });
+
+      pageWrap.addEventListener('touchend', () => { touchMode = false; });
+
+      function getTouchDist(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.hypot(dx, dy);
+      }
+    }
+
+    function setViewerScale(s) {
+      viewerScale = Math.min(3.0, Math.max(0.5, s));
+      const transform = 'scale(' + viewerScale + ')';
+      pageWrap.style.transformOrigin = 'top left';
+      pageWrap.style.transform = transform;
+      zoomInfo.textContent = Math.round(viewerScale * 100) + '%';
+    }
+
+    // Load PDF
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const arrayBuffer = await file.arrayBuffer();
+      pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      currentPage = 1;
+      placeholder.style.display = 'none';
+      pageWrap.style.display = 'block';
+      pageStates.clear();
+      history = [];
+      historyIndex = -1;
+      setViewerScale(1.0);
+      await renderPage(currentPage);
+    });
+
+    // Render
+    async function renderPage(num) {
+      if (!pdfDoc) return;
+      rendering = true;
+      const page = await pdfDoc.getPage(num);
+      const viewport = page.getViewport({ scale });
+      const ctx = pdfCanvas.getContext('2d', { willReadFrequently: false });
+      pdfCanvas.width = viewport.width;
+      pdfCanvas.height = viewport.height;
+
+      // Fit overlay canvas
+      fabCanvasEl.width = viewport.width;
+      fabCanvasEl.height = viewport.height;
+
+      // Resize wrapper
+      pageWrap.style.width = viewport.width + 'px';
+      pageWrap.style.height = viewport.height + 'px';
+
+      // Render PDF page
+      await page.render({ canvasContext: ctx, viewport }).promise;
+
+      // Init/Reset fabric and load page state
+      initFabric();
+      await loadPageState();
+
+      pageInfo.textContent = 'Page ' + num + ' / ' + pdfDoc.numPages;
+      rendering = false;
+    }
+
+    // Page nav
+    prevPageBtn.addEventListener('click', async () => {
+      if (!pdfDoc || rendering) return;
+      if (currentPage <= 1) return;
+      savePageState();
+      currentPage--;
+      await renderPage(currentPage);
+    });
+    nextPageBtn.addEventListener('click', async () => {
+      if (!pdfDoc || rendering) return;
+      if (currentPage >= pdfDoc.numPages) return;
+      savePageState();
+      currentPage++;
+      await renderPage(currentPage);
+    });
+
+    // Tool handling
+    let activeTool = 'select';
+    function setActiveTool(tool) {
+      activeTool = tool;
+      // UI
+      Array.from(toolset.querySelectorAll('button')).forEach(b => {
+        b.classList.toggle('active', b.dataset.tool === tool);
+      });
+      // Fabric modes
+      if (!fabricCanvas) return;
+      if (tool === 'select' || tool === 'eraser') {
+        fabricCanvas.isDrawingMode = false;
+        fabricCanvas.defaultCursor = 'default';
+      } else if (tool === 'pen' || tool === 'highlighter') {
+        fabricCanvas.isDrawingMode = true;
+        setupBrush(tool);
+      } else {
+        fabricCanvas.isDrawingMode = false;
+        fabricCanvas.defaultCursor = 'crosshair';
+      }
+    }
+
+    toolset.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-tool]');
+      if (!btn) return;
+      const t = btn.dataset.tool;
+      if (t === 'image') {
+        addImageFromPicker();
+      } else {
+        setActiveTool(t);
+      }
+    });
+
+    function setupBrush(tool) {
+      const brush = new fabric.PencilBrush(fabricCanvas);
+      const color = strokeColor.value;
+      if (tool === 'highlighter') {
+        brush.color = hexToRgba(color, 0.25);
+        brush.width = Number(strokeWidth.value) * 6;
+      } else {
+        brush.color = color;
+        brush.width = Number(strokeWidth.value);
+      }
+      brush.decimate = 8;
+      fabricCanvas.freeDrawingBrush = brush;
+    }
+
+    // Add objects
+    fabricCanvasEl.addEventListener('mousedown', handlePointerDown);
+    fabricCanvasEl.addEventListener('touchstart', handlePointerDown, { passive: false });
+
+    let drawStart = null;
+    let tempObj = null;
+
+    function getPointer(e) {
+      if (!fabricCanvas) return { x: 0, y: 0 };
+      const p = fabricCanvas.getPointer(e);
+      return { x: p.x, y: p.y };
+    }
+
+    function handlePointerDown(e) {
+      if (!fabricCanvas) return;
+      if (activeTool === 'select' || activeTool === 'pen' || activeTool === 'highlighter') return;
+      if (activeTool === 'eraser') {
+        // delete object under cursor if any
+        const target = fabricCanvas.findTarget(e);
+        if (target) {
+          fabricCanvas.remove(target);
+          fabricCanvas.requestRenderAll();
+        }
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      const p = getPointer(e);
+      drawStart = p;
+
+      if (activeTool === 'text') {
+        const t = new fabric.IText('Text', {
+          left: p.x, top: p.y,
+          fontSize: Number(fontSize.value),
+          fill: strokeColor.value,
+          editable: true
+        });
+        fabricCanvas.add(t);
+        fabricCanvas.setActiveObject(t);
+        t.enterEditing();
+        fabricCanvas.requestRenderAll();
+        drawStart = null;
+        return;
+      }
+      if (activeTool === 'rect') {
+        tempObj = new fabric.Rect({
+          left: p.x, top: p.y, width: 1, height: 1,
+          fill: colorOrTransparent(fillColor.value),
+          stroke: strokeColor.value, strokeWidth: Number(strokeWidth.value),
+          selectable: true
+        });
+      } else if (activeTool === 'ellipse') {
+        tempObj = new fabric.Ellipse({
+          left: p.x, top: p.y, rx: 1, ry: 1,
+          fill: colorOrTransparent(fillColor.value),
+          stroke: strokeColor.value, strokeWidth: Number(strokeWidth.value),
+          originX: 'left', originY: 'top',
+          selectable: true
+        });
+      } else if (activeTool === 'line') {
+        tempObj = new fabric.Line([p.x, p.y, p.x, p.y], {
+          stroke: strokeColor.value, strokeWidth: Number(strokeWidth.value),
+          selectable: true
+        });
+      }
+      if (tempObj) {
+        tempObj._skipHistory = true; // avoid double history entries on add+modify
+        fabricCanvas.add(tempObj);
+        fabricCanvas.requestRenderAll();
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('touchmove', handlePointerMove, { passive: false });
+        window.addEventListener('mouseup', handlePointerUp, { once: true });
+        window.addEventListener('touchend', handlePointerUp, { once: true });
+      }
+    }
+
+    function handlePointerMove(e) {
+      if (!drawStart || !tempObj || !fabricCanvas) return;
+      if (e.type === 'touchmove') e.preventDefault();
+      const p = getPointer(e.touches ? e.touches[0] : e);
+      const dx = p.x - drawStart.x;
+      const dy = p.y - drawStart.y;
+
+      if (tempObj.type === 'rect') {
+        tempObj.set({
+          left: Math.min(drawStart.x, p.x),
+          top: Math.min(drawStart.y, p.y),
+          width: Math.abs(dx),
+          height: Math.abs(dy)
+        });
+      } else if (tempObj.type === 'ellipse') {
+        tempObj.set({
+          left: Math.min(drawStart.x, p.x),
+          top: Math.min(drawStart.y, p.y),
+          rx: Math.abs(dx) / 2,
+          ry: Math.abs(dy) / 2,
+          originX: 'left',
+          originY: 'top'
+        });
+      } else if (tempObj.type === 'line') {
+        tempObj.set({ x2: p.x, y2: p.y });
+      }
+      fabricCanvas.requestRenderAll();
+    }
+
+    function handlePointerUp() {
+      if (!tempObj || !fabricCanvas) return;
+      tempObj._skipHistory = false;
+      // Trigger a history save via modification event
+      fabricCanvas.fire('object:modified', { target: tempObj });
+      tempObj = null;
+      drawStart = null;
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('touchmove', handlePointerMove);
+    }
+
+    function addImageFromPicker() {
+      const imgInput = document.createElement('input');
+      imgInput.type = 'file';
+      imgInput.accept = 'image/*';
+      imgInput.onchange = async () => {
+        const file = imgInput.files && imgInput.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        fabric.Image.fromURL(url, (img) => {
+          const scale = Math.min(1, (pdfCanvas.width * 0.6) / img.width);
+          img.set({
+            left: pdfCanvas.width * 0.2,
+            top: pdfCanvas.height * 0.2,
+            scaleX: scale,
+            scaleY: scale
+          });
+          fabricCanvas.add(img);
+          fabricCanvas.setActiveObject(img);
+          fabricCanvas.requestRenderAll();
+          URL.revokeObjectURL(url);
+        }, { crossOrigin: 'anonymous' });
+      };
+      imgInput.click();
+    }
+
+    function colorOrTransparent(hex) {
+      if (!hex || hex === '#00000000' || hex.length === 9 && hex.endsWith('00')) return 'transparent';
+      return hex;
+    }
+    function hexToRgba(hex, alpha = 1) {
+      const h = hex.replace('#','');
+      const bigint = parseInt(h.length === 3 ? h.split('').map(c=>c+c).join('') : h.slice(0,6), 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    }
+
+    // Style updates
+    strokeColor.addEventListener('change', () => {
+      setupBrush(activeTool);
+      const o = fabricCanvas.getActiveObject();
+      if (o) {
+        if ('set' in o) {
+          if ('stroke' in o) o.set('stroke', strokeColor.value);
+          if (o.type === 'i-text') o.set('fill', strokeColor.value);
+          fabricCanvas.requestRenderAll();
+        }
+      }
+    });
+    strokeWidth.addEventListener('input', () => {
+      setupBrush(activeTool);
+      const o = fabricCanvas.getActiveObject();
+      if (o && 'strokeWidth' in o) {
+        o.set('strokeWidth', Number(strokeWidth.value));
+        fabricCanvas.requestRenderAll();
+      }
+    });
+    fillColor.addEventListener('change', () => {
+      const o = fabricCanvas.getActiveObject();
+      if (o && 'fill' in o && o.type !== 'line') {
+        o.set('fill', colorOrTransparent(fillColor.value));
+        fabricCanvas.requestRenderAll();
+      }
+    });
+    fontSize.addEventListener('change', () => {
+      const o = fabricCanvas.getActiveObject();
+      if (o && o.type === 'i-text') {
+        o.set('fontSize', Number(fontSize.value));
+        fabricCanvas.requestRenderAll();
+      }
+    });
+
+    deleteSelected.addEventListener('click', () => {
+      const o = fabricCanvas.getActiveObject();
+      if (o) fabricCanvas.remove(o);
+    });
+    clearAll.addEventListener('click', () => {
+      fabricCanvas.getObjects().forEach(o => fabricCanvas.remove(o));
+    });
+
+    // Undo/Redo
+    function loadHistory(idx) {
+      if (idx < 0 || idx >= history.length) return;
+      fabricCanvas.off('object:added');
+      fabricCanvas.off('object:modified');
+      fabricCanvas.off('object:removed');
+      fabricCanvas.loadFromJSON(history[idx], () => {
+        fabricCanvas.renderAll();
+        // Rebind events
+        initFabric();
+      });
+    }
+    undoBtn.addEventListener('click', () => {
+      if (historyIndex > 0) {
+        historyIndex--;
+        loadHistory(historyIndex);
+      }
+    });
+    redoBtn.addEventListener('click', () => {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        loadHistory(historyIndex);
+      }
+    });
+
+    // Persist per-page annotation states
+    function savePageState() {
+      if (!pdfDoc || !fabricCanvas) return;
+      const json = fabricCanvas.toDatalessJSON();
+      pageStates.set(currentPage, json);
+    }
+    async function loadPageState() {
+      const json = pageStates.get(currentPage);
+      history = [];
+      historyIndex = -1;
+      if (json) {
+        await new Promise((resolve) => {
+          fabricCanvas.loadFromJSON(json, () => {
+            fabricCanvas.renderAll();
+            resolve();
+          });
+        });
+      } else {
+        fabricCanvas.clear();
+      }
+      // Seed history with current state
+      history.push(fabricCanvas.toDatalessJSON());
+      historyIndex = 0;
+    }
+
+    // Export annotated PDF
+    async function exportAnnotatedPDF() {
+      if (!pdfDoc) return;
+      const { PDFDocument } = PDFLib;
+      const outPdf = await PDFDocument.create();
+
+      for (let p = 1; p <= pdfDoc.numPages; p++) {
+        const pageObj = await pdfDoc.getPage(p);
+        const viewport = pageObj.getViewport({ scale });
+
+        // Render base page to offscreen canvas
+        const offPDF = document.createElement('canvas');
+        offPDF.width = viewport.width;
+        offPDF.height = viewport.height;
+        const offCtx = offPDF.getContext('2d');
+        await pageObj.render({ canvasContext: offCtx, viewport }).promise;
+
+        // Load annotation layer for that page
+        const saved = pageStates.get(p);
+        const annCanvas = document.createElement('canvas');
+        annCanvas.width = viewport.width;
+        annCanvas.height = viewport.height;
+        const annFabric = new fabric.Canvas(annCanvas, { selection: false });
+        if (saved) {
+          await new Promise((resolve) => annFabric.loadFromJSON(saved, () => resolve()));
+          annFabric.renderAll();
+        }
+
+        // Composite base + annotations
+        const merged = document.createElement('canvas');
+        merged.width = viewport.width;
+        merged.height = viewport.height;
+        const mctx = merged.getContext('2d');
+        mctx.drawImage(offPDF, 0, 0);
+        // Draw fabric canvas as bitmap
+        mctx.drawImage(annCanvas, 0, 0);
+
+        // Embed image page into PDF
+        const pngBytes = merged.toDataURL('image/png');
+        const pngImage = await outPdf.embedPng(pngBytes);
+        const page = outPdf.addPage([viewport.width, viewport.height]);
+        page.drawImage(pngImage, { x: 0, y: 0, width: viewport.width, height: viewport.height });
+
+        // Cleanup
+        annFabric.dispose();
+      }
+
+      const bytes = await outPdf.save();
+      return new Blob([bytes], { type: 'application/pdf' });
+    }
+
+    downloadBtn.addEventListener('click', async () => {
+      try {
+        savePageState();
+        const blob = await exportAnnotatedPDF();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'annotated.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert('Export failed: ' + err.message);
+        console.error(err);
+      }
+    });
+
+    shareBtn.addEventListener('click', async () => {
+      try {
+        savePageState();
+        const blob = await exportAnnotatedPDF();
+        if (navigator.canShare && navigator.canShare({ files: [new File([blob], 'annotated.pdf', { type: 'application/pdf' })] })) {
+          const file = new File([blob], 'annotated.pdf', { type: 'application/pdf' });
+          await navigator.share({
+            title: 'Annotated PDF',
+            text: 'Shared from PDF Editor',
+            files: [file]
+          });
+        } else {
+          // Fallback: share link blob URL
+          const url = URL.createObjectURL(blob);
+          await navigator.share?.({ title: 'Annotated PDF', text: url }) ?? (async () => {
+            // As ultimate fallback, just open the blob
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+          })();
+        }
+      } catch (err) {
+        // If share not supported or user cancels
+        console.warn('Share failed or canceled', err);
+      }
+    });
+
+    // Default tool
+    setActiveTool('select');
+  </script>
+</body>
+</html>
