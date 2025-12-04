@@ -58,7 +58,15 @@ main {flex:1;max-width:1200px;margin:2rem auto;padding:0 5%;text-align:center;}
 .btn {background:var(--btn-green);color:#fff;border:none;padding:.8rem 2rem;border-radius:8px;font-weight:600;cursor:pointer;margin:.5rem;transition:var(--transition);}
 .btn:hover {background:var(--btn-hover);transform:scale(1.05);}
 .btn:disabled {opacity:.5;cursor:not-allowed;}
-footer {background:var(--footer-bg);color:var(--footer-text);text-align:center;padding:1.5rem 5%;font-size:.9rem;margin-top:auto;}
+#footer {
+        height: 40px; background: var(--footer-bg); color: var(--footer-text);
+        display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;
+        font-size: 11px; z-index: 1002; flex-shrink: 0;
+        box-shadow: 0 -4px 20px var(--shadow);
+    }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: var(--footer-text); text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 6px; font-weight: 500; opacity: 0.8; }
+    .footer-links a:hover { opacity: 1; }
 .back-home {display:flex;justify-content:center;margin-top:1.5rem;}
 .spinner {margin:2rem 0;font-style:italic;color:#777;}
 .size-info {margin:1rem 0;font-size:0.9rem;color:var(--text-secondary);}
@@ -118,7 +126,15 @@ footer {background:var(--footer-bg);color:var(--footer-text);text-align:center;p
   <div class="back-home"><a href="index.html"><button class="btn">Back to Home</button></a></div>
 </main>
 
-<footer>© 2025 PDF Chamber. All rights reserved.</footer>
+<footer id="footer">
+    <div style="opacity:0.9; font-weight:500;">&copy; 2025 PDF Chamber.</div>
+    <div class="footer-links">
+        <a href="#"><i class="fas fa-info-circle"></i> About</a>
+        <a href="#"><i class="fas fa-shield-alt"></i> Privacy</a>
+        <a href="#"><i class="fas fa-file-contract"></i> Terms</a>
+        <a href="#"><i class="fas fa-headset"></i> Support</a>
+    </div>
+</footer>
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
