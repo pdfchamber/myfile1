@@ -108,13 +108,28 @@ main {
 }
 
 .sub-headline {
-  color:var(--header-bg);
-  font-size:1rem;
-  margin-top:-0.5rem;
-  margin-bottom:1.5rem;
-  line-height:1.4;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  animation: fadeUp 0.7s ease both;
 }
-.sub-headline p {margin:0.2rem 0;}
+.sub-headline h2 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #74ea00, #00AEEF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+.sub-headline p {
+  font-size: 1.3rem;
+  color: var(--header-bg);
+  margin: 0.35rem 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* Upload Area */
 .upload-area {
