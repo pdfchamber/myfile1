@@ -47,29 +47,32 @@ body {
   flex-direction:column;
 }
 
-/* Header + Footer */
-header,footer {
-  padding:1rem 5%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
+/* Header */
 header {
-  background:var(--header-bg);
-  box-shadow:0 4px 20px var(--shadow);
-  position:sticky;
-  top:0;
-  z-index:100;
+  background: var(--header-bg);
+  padding: 1rem 5%;
+  box-shadow: 0 4px 20px var(--shadow);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
 }
-#footer {
-        height: 40px; background: var(--footer-bg); color: var(--footer-text);
-        display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;
-        font-size: 11px; z-index: 1002; flex-shrink: 0;
-        box-shadow: 0 -4px 20px var(--shadow);
-    }
-    .footer-links { display: flex; gap: 20px; }
-    .footer-links a { color: var(--footer-text); text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 6px; font-weight: 500; opacity: 0.8; }
-    .footer-links a:hover { opacity: 1; }
+main { 
+  margin-top: 100px;
+  flex: 1;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
 .logo {
   display:flex;
   align-items:center;
@@ -223,6 +226,17 @@ canvas {
   text-align:center;
 }
 
+  /* Footer */
+    #footer {
+        height: 40px; background: var(--footer-bg); color: var(--footer-text);
+        display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;
+        font-size: 11px; z-index: 1002; flex-shrink: 0;
+        box-shadow: 0 -4px 20px var(--shadow);
+    }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: var(--footer-text); text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 6px; font-weight: 500; opacity: 0.8; }
+    .footer-links a:hover { opacity: 1; }
+
 @media (max-width:480px) {
   .toolbar {
     flex-wrap:wrap;
@@ -233,13 +247,16 @@ canvas {
 </head>
 <body>
 <header>
-  <a href="index.html" class="logo">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
-    PDF Chamber
-  </a>
-  <div style="display:flex; align-items:center; gap:1rem;">
-    <div class="tagline">Smart PDFs, Seamless Productivity</div>
-    <div class="theme-toggle" id="themeToggle"></div>
+    <div class="header-inner">
+        <a href="#" class="logo">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+            PDF Chamber
+        </a>
+        <div style="display:flex; align-items:center; gap:1rem;">
+            <div class="tagline">Smart PDFs, Seamless Productivity</div>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"></button>
+        </div>
+    </div>
 </header>
 
 <main>
