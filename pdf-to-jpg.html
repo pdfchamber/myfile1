@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF to JPG – PDF Chamber</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<style>
+:root{
+  --bg:linear-gradient(135deg,#aef1fc,#e3f2fd,#90caf9);
+  --header:#0a8b65;
+  --card:#ffffff;
+  --primary:#0a8b65;
+  --accent:#00AEEF;
+  --text:#002B5B;
+  --muted:#546E7A;
+  --shadow:rgba(0,0,0,.12);
+}
+[data-theme="dark"]{
+  --bg:linear-gradient(135deg,#0D1B2A,#1B263B,#415A77);
+  --card:#1B263B;
+  --text:#E0E1DD;
+  --muted:#9fb3c8;
+  --shadow:rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER – MATCHED */
+header{
+  background:var(--header);
+  padding:.9rem 5%;
+  position:fixed;
+  width:100%;
+  z-index:10;
+  box-shadow:0 6px 20px var(--shadow);
+}
+.header-inner{
+  max-width:1500px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  font-size:1.6rem;
+  font-weight:700;
+  color:#fff;
+  text-decoration:none;
+}
+.logo svg{width:42px;height:42px;fill:#fff}
+.tagline{
+  color:#e0f2f1;
+  font-size:.95rem;
+  font-weight:500;
+}
+.theme-toggle{
+  width:54px;height:28px;
+  border-radius:30px;
+  background:rgba(255,255,255,.25);
+  border:2px solid #fff;
+  position:relative;
+  cursor:pointer;
+}
+.theme-toggle::before{
+  content:"";
+  position:absolute;
+  width:18px;height:18px;
+  background:#fff;
+  border-radius:50%;
+  top:3px;left:4px;
+  transition:.3s;
+}
+[data-theme="dark"] .theme-toggle::before{
+  transform:translateX(24px);
+  background:#1B263B;
+}
+
+/* MAIN */
+main{margin-top:88px;flex:1}
+
+/* SUB HEADLINE – MATCHES index.html */
+.subhead{
+  text-align:center;
+  padding:1.1rem 5% .5rem;
+}
+.subhead h2{
+  font-size:2.4rem;
+  font-weight:800;
+  line-height:1.15;
+  background:linear-gradient(90deg,#74ea00,#00AEEF);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.subhead p{
+  margin-top:.5rem;
+  font-size:1.1rem;
+  color:var(--muted);
+  font-weight:500;
+}
+
+.card{
+  max-width:1100px;
+  margin:0 auto 2.5rem;
+  background:var(--card);
+  border-radius:18px;
+  padding:2.2rem;
+  box-shadow:0 14px 40px var(--shadow);
+}
+
+/* UPLOAD */
+.upload-row{
+  display:flex;
+  gap:1.2rem;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.dropzone{
+  flex:1;
+  border:2px dashed var(--accent);
+  border-radius:14px;
+  padding:1.5rem;
+  cursor:pointer;
+  text-align:center;
+}
+.dropzone input{display:none}
+.dropzone strong{display:block;font-size:1.05rem}
+.dropzone span{font-size:.9rem;color:var(--muted)}
+.primary{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  padding:1rem 2.4rem;
+  font-size:1.05rem;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* PROGRESS */
+.progress{
+  margin-top:1.3rem;
+  height:10px;
+  background:#cfd8dc;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress div{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00AEEF,#74ea00);
+  transition:.4s;
+}
+
+/* ACTIONS */
+.actions{
+  margin-top:1.8rem;
+  display:flex;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+.actions button{
+  flex:1;
+  min-width:180px;
+  padding:.9rem;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  color:#fff;
+  cursor:pointer;
+}
+.download{background:#0a8b65}
+.share{background:#6a1b9a}
+.delete{background:#d32f2f}
+
+.download-note{
+  margin-top:1rem;
+  font-size:.9rem;
+  color:var(--muted);
+  text-align:center;
+}
+
+/* SHARE MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+.modal-box{
+  background:var(--card);
+  border-radius:16px;
+  padding:1.8rem;
+  width:320px;
+  text-align:center;
+}
+.modal-icons{
+  display:flex;
+  justify-content:center;
+  gap:1.2rem;
+}
+.modal-icons a{
+  width:54px;height:54px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:1.4rem;
+  text-decoration:none;
+}
+.whatsapp{background:#25D366}
+.telegram{background:#0088cc}
+.gmail{background:#EA4335}
+.link{background:#546E7A}
+.close{
+  margin-top:1.4rem;
+  background:#b0bec5;
+  border:none;
+  padding:.5rem 1.4rem;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+/* FOOTER – MATCHED */
+footer{
+  background:var(--header);
+  color:#e0f2f1;
+  font-size:11px;
+  height:40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 2rem;
+}
+.footer-links{
+  display:flex;
+  gap:20px;
+}
+.footer-links a{
+  color:#e0f2f1;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:500;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 .9 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+      PDF Chamber
+    </a>
+    <div style="display:flex;gap:1rem;align-items:center">
+      <div class="tagline">Smart PDFs, Seamless Productivity</div>
+      <button class="theme-toggle" id="themeToggle"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="subhead">
+  <h2>PDF to JPG Converter: From PDF to picture-perfect JPGs</h2>
+  	<p>Fast, flawless file conversion made simple. Your PDFs, reborn as vivid JPGs instantly.<p> 
+	<p>Convert. Save. Share — hassle-free.</p>
+</section>
+
+<div class="card">
+
+<div class="upload-row">
+  <label class="dropzone">
+    <input type="file" id="pdf" accept="application/pdf" multiple>
+    <strong>Drag & drop PDFs</strong>
+    <span>or click to select files</span>
+  </label>
+  <button class="primary" id="convert">Convert to JPG</button>
+</div>
+
+<div class="progress"><div id="bar"></div></div>
+
+<div class="actions">
+  <button class="download" id="download">Download</button>
+  <button class="share" id="share">Share download link</button>
+  <button class="delete" id="reset">Delete</button>
+</div>
+
+<p class="download-note">
+  Multi-page PDFs download as multiple JPG files. Please allow multiple downloads.
+</p>
+
+</div>
+</main>
+
+<footer>
+  <div>© 2025 PDF Chamber.</div>
+  <div class="footer-links">
+    <a href="#"><i class="fas fa-info-circle"></i> About</a>
+    <a href="#"><i class="fas fa-shield-alt"></i> Privacy</a>
+    <a href="#"><i class="fas fa-file-contract"></i> Terms</a>
+    <a href="#"><i class="fas fa-headset"></i> Support</a>
+  </div>
+</footer>
+
+<!-- SHARE MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>Share</h3>
+    <div class="modal-icons">
+      <a class="whatsapp" id="wa"><i class="fab fa-whatsapp"></i></a>
+      <a class="telegram" id="tg"><i class="fab fa-telegram-plane"></i></a>
+      <a class="gmail" id="gm"><i class="fas fa-envelope"></i></a>
+      <a class="link" id="copy"><i class="fas fa-link"></i></a>
+    </div>
+    <button class="close" id="close">Close</button>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const pdfInput=document.getElementById("pdf");
+const bar=document.getElementById("bar");
+let outputs=[];
+
+document.getElementById("convert").onclick=async()=>{
+  outputs=[]; bar.style.width="0%";
+  for(const file of pdfInput.files){
+    const base=file.name.replace(/\.pdf$/i,"");
+    const pdf=await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const v=page.getViewport({scale:2});
+      const c=document.createElement("canvas");
+      c.width=v.width;c.height=v.height;
+      await page.render({canvasContext:c.getContext("2d"),viewport:v}).promise;
+      const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.95));
+      outputs.push({blob,name:`${base}_page_${i}.jpg`});
+    }
+    bar.style.width="100%";
+  }
+};
+
+document.getElementById("download").onclick=()=>{
+  outputs.forEach(o=>{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(o.blob);
+    a.download=o.name;
+    a.click();
+  });
+};
+
+/* SHARE – FIXED */
+const modal=document.getElementById("modal");
+document.getElementById("share").onclick=async()=>{
+  const data={title:"PDF to JPG – PDF Chamber",url:location.href};
+  if(navigator.share){
+    try{await navigator.share(data);}catch{}
+  }else{
+    modal.style.display="flex";
+  }
+};
+document.getElementById("close").onclick=()=>modal.style.display="none";
+modal.onclick=e=>{if(e.target===modal)modal.style.display="none"};
+
+const txt=encodeURIComponent("Convert PDF to JPG using PDF Chamber");
+const url=encodeURIComponent(location.href);
+wa.href=`https://wa.me/?text=${txt}%20${url}`;
+tg.href=`https://t.me/share/url?url=${url}&text=${txt}`;
+gm.href=`https://mail.google.com/mail/?view=cm&su=PDF%20to%20JPG&body=${txt}%20${url}`;
+copy.onclick=()=>{navigator.clipboard.writeText(location.href);alert("Link copied");};
+
+document.getElementById("reset").onclick=()=>{
+  pdfInput.value="";outputs=[];bar.style.width="0%";
+};
+
+document.getElementById("themeToggle").onclick=()=>{
+  const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);
+  localStorage.setItem("theme",t);
+};
+document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"light");
+</script>
+
+</body>
+</html>
