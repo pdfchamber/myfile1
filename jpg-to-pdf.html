@@ -1,1 +1,472 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JPG to PDF – PDF Chamber</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:linear-gradient(135deg,#aef1fc,#e3f2fd,#90caf9);
+  --header:#0a8b65;
+  --card:#ffffff;
+  --accent:#00AEEF;
+  --text:#002B5B;
+  --muted:#546E7A;
+  --shadow:rgba(0,0,0,.12);
+}
+[data-theme="dark"]{
+  --bg:linear-gradient(135deg,#0D1B2A,#1B263B,#415A77);
+  --card:#1B263B;
+  --text:#E0E1DD;
+  --muted:#9fb3c8;
+  --shadow:rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Inter,system-ui;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;
+}
+
+/* HEADER */
+header{
+  background:var(--header);
+  padding:.9rem 5%;
+  position:fixed;
+  width:100%;
+  z-index:10;
+  box-shadow:0 6px 20px var(--shadow);
+}
+.header-inner{
+  max-width:1500px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  font-size:1.6rem;
+  font-weight:700;
+  color:#fff;
+  text-decoration:none;
+}
+.logo svg{width:42px;height:42px;fill:#fff}
+.tagline{
+  color:#e0f2f1;
+  font-size:.95rem;
+  font-weight:500;
+}
+.theme-toggle{
+  width:54px;height:28px;
+  border-radius:30px;
+  background:rgba(255,255,255,.25);
+  border:2px solid #fff;
+  position:relative;
+  cursor:pointer;
+}
+.theme-toggle::before{
+  content:"";
+  position:absolute;
+  width:18px;height:18px;
+  background:#fff;
+  border-radius:50%;
+  top:3px;left:4px;
+  transition:.3s;
+}
+[data-theme="dark"] .theme-toggle::before {
+  transform: translateX(26px);
+}
+
+/* MAIN */
+main{margin-top:74px;padding:0 5%;flex:1}
+.subhead{text-align:center;padding:.6rem 0 .8rem}
+.subhead h2{
+  margin:0;font-size:2.2rem;font-weight:800;
+  background:linear-gradient(90deg,#74ea00,#00AEEF);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.subhead p{margin:.3rem 0;color:var(--muted)}
+
+.app-grid{
+  max-width:1400px;margin:auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;
+}
+@media(max-width:900px){.app-grid{grid-template-columns:1fr}}
+
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:2rem;
+  box-shadow:0 14px 40px var(--shadow);
+}
+
+/* CONVERTER */
+.dropzone{
+  width:100%;min-height:120px;
+  border:2px dashed var(--accent);
+  border-radius:14px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  cursor:pointer;text-align:center;
+}
+.dropzone input{display:none}
+
+.progress{
+  width:100%;height:8px;background:#d0d7de;
+  border-radius:6px;overflow:hidden;margin:1rem 0;
+}
+.progress span{
+  display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,#00AEEF,#74ea00);
+  transition:.3s;
+}
+
+.btn-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:.8rem;
+}
+.btn{
+  padding:.8rem;border:none;border-radius:10px;
+  font-weight:600;color:#fff;cursor:pointer;
+}
+.convert{background:#0277bd}
+.download{background:#0a8b65}
+.share{background:#6a1b9a}
+.reset{background:#d32f2f}
+
+/* SHARE ICONS */
+.share-icons{
+  display:flex;
+  gap:.8rem;
+  margin:1rem 0 .3rem;
+}
+.share-icons button{
+  flex:1;border:none;border-radius:10px;
+  padding:.6rem 0;color:#fff;font-size:18px;cursor:pointer;
+}
+.whatsapp{background:#25D366}
+.telegram{background:#0088cc}
+.gmail{background:#D93025}
+.link{background:#546E7A}
+
+.share-note{
+  font-size:12px;color:var(--muted);
+  margin-bottom:1rem;text-align:center;
+}
+
+/* SETTINGS */
+.settings{display:grid;gap:1.3rem}
+.settings select{
+  width:100%;
+  padding:.6rem;
+  border-radius:8px;
+  border:1px solid #cfd8dc;
+}
+
+.thumbs{display:flex;gap:10px;flex-wrap:wrap}
+.thumb{
+  width:90px;padding:6px;border:2px solid #cfd8dc;
+  border-radius:10px;background:#fafafa;cursor:grab;
+}
+.thumb img{width:100%;border-radius:6px}
+
+.slider-line{display:flex;align-items:center;gap:1rem}
+.slider-line input{flex:1}
+.val{min-width:80px;text-align:right;color:var(--muted)}
+
+/* FOOTER */
+footer{
+  background:var(--header);
+  color:#e0f2f1;
+  font-size:11px;
+  height:40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 2rem;
+}
+.footer-links{
+  display:flex;
+  gap:20px;
+}
+.footer-links a{
+  color:#e0f2f1;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:500;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo">
+      <svg viewBox="0 0 24 24">
+        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/>
+      </svg>
+      PDF Chamber
+    </a>
+    <div style="display:flex;gap:1rem;align-items:center">
+      <div class="tagline">Smart PDFs, Seamless Productivity</div>
+      <button class="theme-toggle" id="themeToggle"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="subhead">
+  <h2>JPG to PDF Converter: From images to flawless PDFs</h2>
+  <p>PDFs that wow, every time. Snap it, convert it, share it. Make your files shine.</p>
+</section>
+
+<div class="app-grid">
+
+<!-- LEFT CARD -->
+<div class="card">
+  <label class="dropzone">
+    <input type="file" id="images" multiple accept="image/jpeg,image/png">
+    <strong>Drag & drop images</strong>
+    <span>or click to select</span>
+  </label>
+
+  <div class="progress"><span id="bar"></span></div>
+
+  <div class="btn-grid">
+    <button class="btn convert" onclick="convertPDF()">Convert</button>
+    <button class="btn download" onclick="downloadPDF()">Download</button>
+    <button class="btn share" onclick="shareNative()">Share</button>
+    <button class="btn reset" onclick="resetAll()">Reset</button>
+  </div>
+
+  <div class="share-icons">
+    <button class="whatsapp"><i class="fa-brands fa-whatsapp"></i></button>
+    <button class="telegram"><i class="fa-brands fa-telegram"></i></button>
+    <button class="gmail"><i class="fa-brands fa-google"></i></button>
+    <button class="link"><i class="fa-solid fa-link"></i></button>
+  </div>
+  <div class="share-note">
+    Files can be shared directly only via the Share button on supported devices
+  </div>
+
+  <!-- ✅ MERGE DROPDOWN FULL WIDTH -->
+  <div class="settings">
+    <div>
+      <label>Merge/Unmerge</label>
+      <select id="merge">
+        <option value="yes" selected>Merge all images in a single PDF file</option>
+        <option value="no">Download separate PDFs</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT CARD -->
+<div class="card">
+  <div class="settings">
+    <div class="thumbs" id="thumbs"></div>
+
+    <div>
+      <label>Compression</label>
+      <div class="slider-line">
+        <input type="range" id="quality" min="40" max="100" value="85">
+        <div class="val"><span id="qVal">85</span>%</div>
+      </div>
+    </div>
+
+    <div>
+      <label>Margin</label>
+      <div class="slider-line">
+        <input type="range" id="margin" min="0" max="30" value="10">
+        <div class="val"><span id="mVal">10</span> mm</div>
+      </div>
+    </div>
+
+    <div>
+      <label>Page Size</label>
+      <select id="size">
+        <option value="a4" selected>A4</option>
+        <option value="letter">Letter</option>
+        <option value="fit">Fit</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Orientation</label>
+      <select id="orientation">
+        <option value="p">Portrait</option>
+        <option value="l">Landscape</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div>© 2026 PDF Chamber.</div>
+  <div class="footer-links">
+    <a href="#"><i class="fas fa-info-circle"></i> About</a>
+    <a href="#"><i class="fas fa-shield-alt"></i> Privacy</a>
+    <a href="#"><i class="fas fa-file-contract"></i> Terms</a>
+    <a href="#"><i class="fas fa-headset"></i> Support</a>
+  </div>
+</footer>
+
+<script>
+const { jsPDF } = window.jspdf;
+let files=[], pdfBlob=null, pdfBlobs=[], dragFrom=0;
+
+images.onchange=()=>{files=[...images.files];renderThumbs()};
+
+function renderThumbs(){
+  thumbs.innerHTML="";
+  files.forEach((f,i)=>{
+    const d=document.createElement("div");
+    d.className="thumb";d.draggable=true;
+    d.ondragstart=()=>dragFrom=i;
+    d.ondragover=e=>e.preventDefault();
+    d.ondrop=()=>{
+      const moved=files.splice(dragFrom,1)[0];
+      files.splice(i,0,moved);
+      renderThumbs();
+    };
+    const img=document.createElement("img");
+    img.src=URL.createObjectURL(f);
+    d.appendChild(img);
+    thumbs.appendChild(d);
+  });
+}
+
+quality.oninput=()=>qVal.textContent=quality.value;
+margin.oninput=()=>mVal.textContent=margin.value;
+
+function getPageFormat(){
+  if(size.value==="a4") return [210,297];
+  if(size.value==="letter") return [215.9,279.4];
+  return null;
+}
+
+async function convertPDF(){
+  bar.style.width="0%";
+  pdfBlob=null;
+  pdfBlobs=[];
+
+  const q=quality.value/100, m=+margin.value;
+  const mergeMode=merge.value;
+  const format=getPageFormat();
+
+  let pdf=null;
+
+  for(let i=0;i<files.length;i++){
+    const imgData=await toData(files[i]);
+    const img=new Image(); img.src=imgData;
+    await img.decode();
+
+    const pageFormat=format || [img.width*0.2646, img.height*0.2646];
+
+    if(!pdf){
+      pdf=new jsPDF({
+        unit:"mm",
+        orientation:orientation.value,
+        format:pageFormat
+      });
+    }else{
+      pdf.addPage(pageFormat);
+    }
+
+    const pw=pdf.internal.pageSize.getWidth()-m*2;
+    const ph=pdf.internal.pageSize.getHeight()-m*2;
+    const r=Math.min(pw/img.width, ph/img.height);
+
+    pdf.addImage(
+      imgData,
+      "JPEG",
+      m,m,
+      img.width*r,
+      img.height*r,
+      "",
+      "FAST",
+      q
+    );
+
+    if(mergeMode==="no"){
+      pdfBlobs.push(pdf.output("blob"));
+      pdf=null;
+    }
+
+    bar.style.width=((i+1)/files.length*100)+"%";
+  }
+
+  if(mergeMode==="yes" && pdf){
+    pdfBlob=pdf.output("blob");
+  }
+}
+
+function downloadPDF(){
+  if(merge.value==="yes"){
+    if(!pdfBlob) return;
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(pdfBlob);
+    a.download="pdfchamber-images.pdf";
+    a.click();
+  }else{
+    if(!pdfBlobs.length) return;
+    pdfBlobs.forEach((b,i)=>{
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(b);
+      a.download=`pdfchamber-image-${i+1}.pdf`;
+      a.click();
+    });
+  }
+}
+
+function shareNative(){
+  if(!pdfBlob || !navigator.share) return;
+  navigator.share({
+    files:[
+      new File([pdfBlob],"pdfchamber-images.pdf",{type:"application/pdf"})
+    ]
+  });
+}
+
+function resetAll(){
+  files=[];
+  thumbs.innerHTML="";
+  bar.style.width="0%";
+  images.value="";
+  pdfBlob=null;
+  pdfBlobs=[];
+}
+
+function toData(f){
+  return new Promise(r=>{
+    const fr=new FileReader();
+    fr.onload=e=>r(e.target.result);
+    fr.readAsDataURL(f);
+  });
+}
+
+themeToggle.onclick=()=>{
+  const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);
+  localStorage.setItem("theme",t);
+};
+document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"light");
+</script>
+
+</body>
+</html>
 
